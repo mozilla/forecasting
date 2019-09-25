@@ -8,11 +8,11 @@ from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 from datetime import timedelta
 
-from forecasting.simpleprophet.models import setupModels, dataFilter
+from forecasting.simpleprophet.models import setup_models, data_filter
 
 
 # Delete output table if necessary and create empty table with appropriate schema
-def resetOuputTable(bigquery_client, project, dataset, table_name):
+def reset_ouput_table(bigquery_client, project, dataset, table_name):
     dataset_ref = bigquery_client.dataset(dataset)
     table_ref = dataset_ref.table(table_name)
     try:
@@ -36,20 +36,20 @@ def resetOuputTable(bigquery_client, project, dataset, table_name):
     return table
 
 
-def writeForecasts(bigquery_client, table, modelDate, forecastEnd, data, product):
+def write_forecasts(bigquery_client, table, modelDate, forecast_end, data, product):
     minYear = data.ds.min().year
-    maxYear = forecastEnd.year
+    maxYear = forecast_end.year
     years = range(minYear, maxYear + 1)
-    models = setupModels(years)
-    forecastStart = modelDate + timedelta(days=1)
-    forecastPeriod = pd.DataFrame({'ds': pd.date_range(forecastStart, forecastEnd)})
-    data = dataFilter(data, product)
+    models = setup_models(years)
+    forecast_start = modelDate + timedelta(days=1)
+    forecast_period = pd.DataFrame({'ds': pd.date_range(forecast_start, forecast_end)})
+    data = data_filter(data, product)
     models[product].fit(data.query("ds <= @modelDate"))
-    forecastSamples = models[product].sample_posterior_predictive(
-        models[product].setup_dataframe(forecastPeriod)
+    forecast_samples = models[product].sample_posterior_predictive(
+        models[product].setup_dataframe(forecast_period)
     )
-    forecast = models[product].predict(forecastPeriod)
-    outputData = {
+    forecast = models[product].predict(forecast_period)
+    output_data = {
         "asofdate": modelDate,
         "datasource": product,
         "date": forecast.ds,
@@ -58,17 +58,17 @@ def writeForecasts(bigquery_client, table, modelDate, forecastEnd, data, product
         "low90": forecast.yhat_lower,
         "high90": forecast.yhat_upper,
     }
-    outputData.update({
-        "p{}".format(q): np.nanpercentile(forecastSamples['yhat'], q, axis=1)
+    output_data.update({
+        "p{}".format(q): np.nanpercentile(forecast_samples['yhat'], q, axis=1)
         for q in range(10, 100, 10)
     })
-    outputData = pd.DataFrame(outputData)[[
+    output_data = pd.DataFrame(output_data)[[
       "asofdate", "datasource", "date", "type", "mau", "low90", "high90",
       "p10", "p20", "p30", "p40", "p50", "p60", "p70", "p80", "p90"
     ]]
-    outputData['date'] = pd.to_datetime(outputData['date']).dt.date
+    output_data['date'] = pd.to_datetime(output_data['date']).dt.date
     errors = bigquery_client.insert_rows(
         table,
-        list(outputData.itertuples(index=False, name=None))
+        list(output_data.itertuples(index=False, name=None))
     )
     assert errors == []

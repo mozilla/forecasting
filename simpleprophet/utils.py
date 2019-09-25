@@ -9,24 +9,24 @@ from datetime import timedelta
 
 
 # Calculate Mean Absolute Percentage Error of forecast
-def calcMAPE(true, predicted):
+def calc_mape(true, predicted):
     mask = true != 0
     return (np.fabs(true - predicted)/true)[mask].mean() * 100
 
 
 # Calculate Mean Relative Error of forecast
-def calcMRE(true, predicted):
+def calc_mre(true, predicted):
     mask = true != 0
     return ((true - predicted)/true)[mask].mean() * 100
 
 
-def calcLogRatio(true, predicted):
+def calc_log_ratio(true, predicted):
     logratio = np.mean(np.log(predicted) - np.log(true))
     return logratio
 
 
 # Get most recent date in table
-def getLatestDate(bqClient, project, dataset, table, product, field):
+def get_latest_date(bq_client, project, dataset, table, product, field):
     query = '''
         SELECT
             MAX({field}) as date
@@ -37,36 +37,38 @@ def getLatestDate(bqClient, project, dataset, table, product, field):
     '''.format(
         project=project, dataset=dataset, table=table, field=field, product=product
     )
-    data = bqClient.query(query).to_dataframe()
+    data = bq_client.query(query).to_dataframe()
     if len(data) == 0:
         return None
-    return bqClient.query(query).to_dataframe()['date'][0]
+    return bq_client.query(query).to_dataframe()['date'][0]
 
 
-def splitData(data, firstTrainDate, firstHoldoutDate, firstTestDate, lastTestDate):
+def split_data(
+    data, first_train_date, first_holdout_date, first_test_date, last_test_date
+):
     temp = data.set_index('ds')
     split_data = {
         "training": temp[
-            firstTrainDate:(firstHoldoutDate - timedelta(days=1))
+            first_train_date:(first_holdout_date - timedelta(days=1))
         ].reset_index(),
         "holdout": temp[
-            firstHoldoutDate:(firstTestDate - timedelta(days=1))
+            first_holdout_date:(first_test_date - timedelta(days=1))
         ].reset_index(),
-        "test": temp[firstTestDate:lastTestDate].reset_index(),
+        "test": temp[first_test_date:last_test_date].reset_index(),
         "all": temp.reset_index(),
     }
     return split_data
 
 
-def s2d(stringDate):
-    return pd.to_datetime(stringDate).date()
+def s2d(date_string):
+    return pd.to_datetime(date_string).date()
 
 
-def matchDates(data, forecast):
+def match_dates(data, forecast):
     return data.merge(forecast, on="ds", how="inner")
 
 
-def getLayout(title, xaxis, yaxis):
+def get_layout(title, xaxis, yaxis):
     return go.Layout(
         title=title,
         xaxis=go.layout.XAxis(
@@ -82,7 +84,9 @@ def getLayout(title, xaxis, yaxis):
     )
 
 
-def GenerateForecastData(modelGen, metricData, asofdateRange, targetDateRange):
+def generate_forecast_data(
+    model_gen, metric_data, asofdate_range, target_date_range
+):
     data = pd.DataFrame({
         "ds": [],
         "asofdate": [],
@@ -90,10 +94,10 @@ def GenerateForecastData(modelGen, metricData, asofdateRange, targetDateRange):
         "yhat_lower": [],
         "yhat_upper": [],
     })
-    for asofdate in asofdateRange:
-        model = modelGen()
-        model.fit(metricData.query("ds <= @asofdate"))
-        forecast_period = pd.DataFrame({'ds': targetDateRange})
+    for asofdate in asofdate_range:
+        model = model_gen()
+        model.fit(metric_data.query("ds <= @asofdate"))
+        forecast_period = pd.DataFrame({'ds': target_date_range})
         forecast = model.predict(forecast_period)
         data = pd.concat([data, pd.DataFrame({
             "ds": forecast.ds,

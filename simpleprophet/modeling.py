@@ -6,26 +6,26 @@ from plotly.offline import plot
 import plotly.graph_objs as go
 from fbprophet.plot import add_changepoints_to_plot
 
-from forecasting.simpleprophet.utils import calcMAPE
+from forecasting.simpleprophet.utils import calc_mape
 
 
-def evaluateModel(model, data, endDate=None, title=None):
+def evaluate_model(model, data, end_date=None, title=None):
     model.fit(data["training"])
     holdout_period = model.make_future_dataframe(
         periods=len(data["holdout"]), include_history=False
     )
     holdout_forecast = model.predict(holdout_period)
-    if endDate is None:
+    if end_date is None:
         periods = len(data["holdout"])
     else:
-        periods = (endDate - data["training"].ds.max()).days
+        periods = (end_date - data["training"].ds.max()).days
     all_period = model.make_future_dataframe(periods=periods, include_history=True)
     all_forecast = model.predict(all_period)
     text = '{}Holdout MAPE: {:,.2f}%'.format(
         "{} - ".format(title) if title is not None else "",
-        calcMAPE(data["holdout"].y, holdout_forecast.yhat)
+        calc_mape(data["holdout"].y, holdout_forecast.yhat)
     )
-    plotHTML = plot({"data": [
+    plot_html = plot({"data": [
         go.Scatter(x=data["all"]['ds'], y=data["all"]['y'], name='y'),
         go.Scatter(x=all_forecast['ds'], y=all_forecast['yhat'], name='yhat'),
         go.Scatter(
@@ -37,11 +37,11 @@ def evaluateModel(model, data, endDate=None, title=None):
             mode='none', name='lower'
         ),
     ], "layout": go.Layout(title=text)}, output_type='div')
-    plotProphet = model.plot(all_forecast)
-    add_changepoints_to_plot(plotProphet.gca(), model, all_forecast)
-    plotComponents = model.plot_components(all_forecast)
+    plot_prophet = model.plot(all_forecast)
+    add_changepoints_to_plot(plot_prophet.gca(), model, all_forecast)
+    plot_components = model.plot_components(all_forecast)
     return {
-        "plot": plotHTML,
-        "prophetplot": plotProphet,
-        "plotcomponents": plotComponents
+        "plot": plot_html,
+        "prophetplot": plot_prophet,
+        "plot_components": plot_components
     }

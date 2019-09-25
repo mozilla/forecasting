@@ -5,7 +5,7 @@
 import pandas as pd
 
 
-_kpi_queries = {
+KPI_QUERIES = {
     "desktop": '''
         SELECT
             submission_date as date,
@@ -45,18 +45,18 @@ _kpi_queries = {
 }
 
 
-def getKPIData(bqClient, types=list(_kpi_queries.keys())):
+def get_kpi_data(bq_client, types=list(KPI_QUERIES.keys())):
     data = {}
     if not isinstance(types, list):
         types = [types]
     for q in types:
-        rawData = bqClient.query(_kpi_queries[q]).to_dataframe()
-        data['{}_global'.format(q)] = rawData[
+        raw_data = bq_client.query(KPI_QUERIES[q]).to_dataframe()
+        data['{}_global'.format(q)] = raw_data[
             ["date", "global_mau"]
         ].rename(
             index=str, columns={"date": "ds", "global_mau": "y"}
         )
-        data['{}_tier1'.format(q)] = rawData[
+        data['{}_tier1'.format(q)] = raw_data[
             ["date", "tier1_mau"]
         ].rename(
             index=str, columns={"date": "ds", "tier1_mau": "y"}
@@ -66,7 +66,7 @@ def getKPIData(bqClient, types=list(_kpi_queries.keys())):
     return data
 
 
-_nondesktop_query = '''
+NONDESKTOP_QUERY = '''
     SELECT
         submission_date as date,
         SUM(mau) AS global_mau,
@@ -81,14 +81,14 @@ _nondesktop_query = '''
     '''
 
 
-def getNondesktopData(bqClient):
+def get_nondesktop_data(bq_client):
     data = {}
-    rawData = bqClient.query(_nondesktop_query).to_dataframe()
+    raw_data = bq_client.query(NONDESKTOP_QUERY).to_dataframe()
     for p in [
         "Fennec Android", "Focus iOS", "Focus Android", "Fennec iOS", "Fenix",
         "Firefox Lite", "FirefoxForFireTV", "FirefoxConnect"
     ]:
-        data['{}'.format(p)] = rawData.query("product == @p")[
+        data['{}'.format(p)] = raw_data.query("product == @p")[
             ["date", "global_mau"]
         ].rename(
             index=str, columns={"date": "ds", "global_mau": "y"}
@@ -98,7 +98,7 @@ def getNondesktopData(bqClient):
     return data
 
 
-_nondesktop_nofire_query = '''
+NONDESKTOP_NOFIRE_QUERY = '''
     SELECT
         submission_date as date,
         SUM(mau) AS global_mau,
@@ -115,15 +115,15 @@ _nondesktop_nofire_query = '''
     '''
 
 
-def getNondesktopNoFireData(bqClient):
+def get_nondesktop_nofire_data(bq_client):
     data = {}
-    rawData = bqClient.query(_nondesktop_nofire_query).to_dataframe()
-    data['nondesktop_nofire_global'] = rawData[
+    raw_data = bq_client.query(NONDESKTOP_NOFIRE_QUERY).to_dataframe()
+    data['nondesktop_nofire_global'] = raw_data[
         ["date", "global_mau"]
     ].rename(
         index=str, columns={"date": "ds", "global_mau": "y"}
     )
-    data['nondesktop_nofire_tier1'] = rawData[
+    data['nondesktop_nofire_tier1'] = raw_data[
         ["date", "tier1_mau"]
     ].rename(
         index=str, columns={"date": "ds", "tier1_mau": "y"}
@@ -133,7 +133,7 @@ def getNondesktopNoFireData(bqClient):
     return data
 
 
-_forecast_query = '''
+FORECAST_QUERY = '''
     SELECT
         date,
         asofdate,
@@ -145,27 +145,27 @@ _forecast_query = '''
     WHERE
         datasource = '{product}'
         AND type = 'forecast'
-        AND asofdate BETWEEN "{asofdateStart}" AND "{asofdateEnd}"
+        AND asofdate BETWEEN "{asofdate_start}" AND "{asofdate_end}"
     ORDER BY
         date
     '''
 
 
-def getForecastData(
-    bqClient, project, dataset, table, product, asofdateStart, asofdateEnd
+def get_forecast_data(
+    bq_client, project, dataset, table, product, asofdate_start, asofdate_end
 ):
-    rawData = bqClient.query(_forecast_query.format(
+    raw_data = bq_client.query(FORECAST_QUERY.format(
         project=project,
         dataset=dataset,
         table=table,
         product=product,
-        asofdateStart=asofdateStart,
-        asofdateEnd=asofdateEnd,
+        asofdate_start=asofdate_start,
+        asofdate_end=asofdate_end,
     )).to_dataframe().rename(columns={
         "date": "ds",
         "mau": "yhat",
         "high90": "yhat_upper",
         "low90": "yhat_lower",
     })
-    rawData['ds'] = pd.to_datetime(rawData['ds']).dt.date
-    return rawData
+    raw_data['ds'] = pd.to_datetime(raw_data['ds']).dt.date
+    return raw_data

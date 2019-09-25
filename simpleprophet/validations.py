@@ -8,31 +8,31 @@ from datetime import timedelta
 from collections import defaultdict
 from plotly.offline import plot
 import plotly.graph_objs as go
-from forecasting.simpleprophet.utils import matchDates, getLayout
+from forecasting.simpleprophet.utils import match_dates, get_layout
 
 
-def _getSinglePrediction(forecastData, asofdate, targetDate):
-    temp = forecastData.query("asofdate == @asofdate & ds == @targetDate")
+def _get_single_prediction(forecast_data, asofdate, target_date):
+    temp = forecast_data.query("asofdate == @asofdate & ds == @target_date")
     if len(temp.yhat) == 1:
         return (temp.yhat.item(), temp.yhat_lower.item(), temp.yhat_upper.item())
     else:
         return None
 
 
-def ValidateStability(forecastDataDict, asofdateRange, targetDate, suppressCI=False):
+def validate_stability(forecast_data_dict, asofdate_range, target_date, suppress_ci=False):
     data = {}
-    for forecastDataKey in forecastDataDict:
+    for forecast_data_key in forecast_data_dict:
         dates = []
         values = []
-        for asofdate in asofdateRange:
-            prediction = _getSinglePrediction(
-                forecastDataDict[forecastDataKey], asofdate, targetDate)
+        for asofdate in asofdate_range:
+            prediction = _get_single_prediction(
+                forecast_data_dict[forecast_data_key], asofdate, target_date)
             if prediction is not None:
                 values.append([prediction])
                 dates.append(asofdate)
-        data[forecastDataKey] = pd.DataFrame({
+        data[forecast_data_key] = pd.DataFrame({
             "date": dates,
-            "Predicted MAU for {}".format(targetDate): [i[0][0] for i in values],
+            "Predicted MAU for {}".format(target_date): [i[0][0] for i in values],
             "upper": [i[0][1] for i in values],
             "lower": [i[0][2] for i in values],
         })
@@ -40,40 +40,40 @@ def ValidateStability(forecastDataDict, asofdateRange, targetDate, suppressCI=Fa
         {
             "data": sum(([
                 go.Scatter(
-                    x=data[forecastDataKey]['date'],
-                    y=data[forecastDataKey]["Predicted MAU for {}".format(targetDate)],
-                    name="Prediction for {}".format(forecastDataKey),
+                    x=data[forecast_data_key]['date'],
+                    y=data[forecast_data_key]["Predicted MAU for {}".format(target_date)],
+                    name="Prediction for {}".format(forecast_data_key),
                 ),
                 go.Scatter(
-                    x=data[forecastDataKey]['date'],
-                    y=data[forecastDataKey]['upper'],
+                    x=data[forecast_data_key]['date'],
+                    y=data[forecast_data_key]['upper'],
                     fill='tonexty',
                     mode='none',
-                    name='upper 80% CI for {}'.format(forecastDataKey),
-                ) if not suppressCI else go.Scatter(),
+                    name='upper 80% CI for {}'.format(forecast_data_key),
+                ) if not suppress_ci else go.Scatter(),
                 go.Scatter(
-                    x=data[forecastDataKey]['date'],
-                    y=data[forecastDataKey]['lower'],
+                    x=data[forecast_data_key]['date'],
+                    y=data[forecast_data_key]['lower'],
                     fill='tonexty',
                     mode='none',
-                    name='lower 80% CI for {}'.format(forecastDataKey),
-                ) if not suppressCI else go.Scatter(),
-            ] for forecastDataKey in forecastDataDict), []),
-            "layout": getLayout(
+                    name='lower 80% CI for {}'.format(forecast_data_key),
+                ) if not suppress_ci else go.Scatter(),
+            ] for forecast_data_key in forecast_data_dict), []),
+            "layout": get_layout(
                 ("Predictions of MAU for {} using model "
-                 "fit on data up to each date").format(targetDate),
+                 "fit on data up to each date").format(target_date),
                 "Model Trained On Data Up To Date",
-                "Prediction for {}".format(targetDate)
+                "Prediction for {}".format(target_date)
             )
         },
         output_type="div"
     )
 
 
-def _getMetricForRange(actualData, forecastData, asofdate, metric):
-    forecast = forecastData.query("asofdate == @asofdate & ds > @asofdate")
-    matched = matchDates(
-        actualData,
+def _get_metric_for_range(actual_data, forecast_data, asofdate, metric):
+    forecast = forecast_data.query("asofdate == @asofdate & ds > @asofdate")
+    matched = match_dates(
+        actual_data,
         forecast
     )
     metric = metric(
@@ -83,45 +83,45 @@ def _getMetricForRange(actualData, forecastData, asofdate, metric):
     return metric
 
 
-def ValidateMetric(actualData, forecastDataDict, asofdateRange, metric, metricName):
+def ValidateMetric(actual_data, forecast_data_dict, asofdate_range, metric, metric_name):
     data = {}
-    for k in forecastDataDict:
+    for k in forecast_data_dict:
         dates = []
         mapes = []
-        for d in asofdateRange:
-            mapes.append(_getMetricForRange(actualData, forecastDataDict[k], d, metric))
+        for d in asofdate_range:
+            mapes.append(_get_metric_for_range(actual_data, forecast_data_dict[k], d, metric))
             dates.append(d)
-        data[k] = pd.DataFrame({"date": dates, metricName: mapes})
+        data[k] = pd.DataFrame({"date": dates, metric_name: mapes})
     return plot(
         {
             "data": [go.Scatter(
                 x=data[k]['date'],
-                y=data[k][metricName],
-                name="{} for {}".format(metricName, k)
-            ) for k in forecastDataDict],
-            "layout": getLayout(
-                "{} for model trained up to date".format(metricName),
+                y=data[k][metric_name],
+                name="{} for {}".format(metric_name, k)
+            ) for k in forecast_data_dict],
+            "layout": get_layout(
+                "{} for model trained up to date".format(metric_name),
                 "Model Trained On Data Up To Date",
-                "{} Metric Value".format(metricName)
+                "{} Metric Value".format(metric_name)
             )
         },
         output_type="div"
     )
 
 
-def _getMetricTrace(model, data, trainingEndDate, metric, metricName):
-    forecastStart = trainingEndDate + timedelta(days=1)
-    forecastEnd = data.ds.max()
-    model.fit(data.query("ds <= @trainingEndDate"))
-    forecastPeriod = pd.DataFrame({'ds': pd.date_range(forecastStart, forecastEnd)})
-    forecast = model.predict(forecastPeriod)
-    matched = matchDates(
+def _get_metric_trace(model, data, training_end_date, metric, metric_name):
+    forecast_start = training_end_date + timedelta(days=1)
+    forecast_end = data.ds.max()
+    model.fit(data.query("ds <= @training_end_date"))
+    forecast_period = pd.DataFrame({'ds': pd.date_range(forecast_start, forecast_end)})
+    forecast = model.predict(forecast_period)
+    matched = match_dates(
         data,
         forecast
     )
     return pd.DataFrame({
         "ds": matched.ds,
-        metricName: [
+        metric_name: [
             metric(
                 np.array(matched.query("ds == @d").y),
                 np.array(matched.query("ds == @d").yhat)
@@ -131,31 +131,33 @@ def _getMetricTrace(model, data, trainingEndDate, metric, metricName):
     })
 
 
-def ValidateTraces(modelGen, data, trainingEndDateRange, metric, metricName):
+def validate_traces(model_gen, data, training_end_date_range, metric, metric_name):
     traces = []
-    for d in trainingEndDateRange:
-        traces.append(_getMetricTrace(modelGen(), data, d, metric, metricName))
+    for d in training_end_date_range:
+        traces.append(_get_metric_trace(model_gen(), data, d, metric, metric_name))
     return plot(
         {
             "data":
                 [
-                    go.Scatter(x=d['ds'], y=d[metricName])
+                    go.Scatter(x=d['ds'], y=d[metric_name])
                     for d in traces
                 ],
-                "layout": getLayout(
-                    "Model Traces of {}".format(metricName),
+                "layout": get_layout(
+                    "Model Traces of {}".format(metric_name),
                     "Prediction Date",
-                    "{} Metric Value".format(metricName)
+                    "{} Metric Value".format(metric_name)
                 )
         },
         output_type="div",
     )
 
 
-def _accumulateHorizonMetrics(actualData, forecastData, asofdate, metric, metricValues):
-    forecast = forecastData.query("asofdate == @asofdate & ds > @asofdate")
-    matched = matchDates(
-        actualData,
+def _accumulate_horizon_metrics(
+    actual_data, forecast_data, asofdate, metric, metric_values
+):
+    forecast = forecast_data.query("asofdate == @asofdate & ds > @asofdate")
+    matched = match_dates(
+        actual_data,
         forecast
     )
     for d in matched.ds:
@@ -164,35 +166,35 @@ def _accumulateHorizonMetrics(actualData, forecastData, asofdate, metric, metric
             np.array(matched.query("ds == @d").yhat)
         )
         horizon = (d - asofdate).days
-        metricValues[horizon].append(metricValue)
+        metric_values[horizon].append(metricValue)
 
 
-def ValidateMetricHorizon(
-    actualData, forecastDataDict, trainingEndDateRange, metric, metricName
+def validate_metric_horizon(
+    actual_data, forecast_data_dict, training_end_date_range, metric, metric_name
 ):
     data = {}
-    for k in forecastDataDict:
+    for k in forecast_data_dict:
         metricValues = defaultdict(lambda: [])
-        for d in trainingEndDateRange:
-            _accumulateHorizonMetrics(
-                actualData, forecastDataDict[k], d, metric, metricValues
+        for d in training_end_date_range:
+            _accumulate_horizon_metrics(
+                actual_data, forecast_data_dict[k], d, metric, metricValues
             )
         data[k] = pd.DataFrame({
             "horizon": [i for i in metricValues.keys()],
-            metricName: [np.mean(metricValues[h]) for h in metricValues.keys()]
+            metric_name: [np.mean(metricValues[h]) for h in metricValues.keys()]
         })
     return plot({
         "data": [
             go.Scatter(
                 x=data[k]['horizon'],
-                y=data[k][metricName],
-                name="{} for {}".format(metricName, k)
+                y=data[k][metric_name],
+                name="{} for {}".format(metric_name, k)
             )
-            for k in forecastDataDict
+            for k in forecast_data_dict
         ],
-        "layout": getLayout(
-            "{} Metric By Model Horizon".format(metricName),
+        "layout": get_layout(
+            "{} Metric By Model Horizon".format(metric_name),
             "Model Horizon",
-            "Mean {} Metric Value".format(metricName)
+            "Mean {} Metric Value".format(metric_name)
         )
     }, output_type="div")
