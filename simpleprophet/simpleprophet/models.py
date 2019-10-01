@@ -5,7 +5,7 @@
 from fbprophet import Prophet
 import pandas as pd
 from datetime import date, timedelta
-from forecasting.simpleprophet.utils import s2d
+from simpleprophet.utils import s2d
 
 
 # Get easter dates

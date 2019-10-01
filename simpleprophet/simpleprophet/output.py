@@ -8,11 +8,11 @@ from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 from datetime import timedelta
 
-from forecasting.simpleprophet.models import setup_models, data_filter
+from simpleprophet.models import setup_models, data_filter
 
 
 # Delete output table if necessary and create empty table with appropriate schema
-def reset_ouput_table(bigquery_client, project, dataset, table_name):
+def reset_output_table(bigquery_client, project, dataset, table_name):
     dataset_ref = bigquery_client.dataset(dataset)
     table_ref = dataset_ref.table(table_name)
     try:

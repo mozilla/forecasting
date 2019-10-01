@@ -30,6 +30,17 @@ Various utility functions.
 
 Tools for valdiation and evaluation of forecast models.
 
+## Local development
+
+To set up a local development environment, you'll need Python 3 and we
+recommend using a virtual environment:
+
+```
+cd simpleprophet/
+python3 -m venv venv
+pip install -r requirements.txt
+```
+
 ---
 
 For more information, contact jmccrosky@mozilla.com

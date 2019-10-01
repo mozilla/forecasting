@@ -5,10 +5,10 @@
 import pandas as pd
 from datetime import timedelta
 
-from forecasting.simpleprophet.output import reset_ouput_table, write_forecasts
-from forecasting.simpleprophet.data import get_kpi_data, get_nondesktop_data
-from forecasting.simpleprophet.data import get_nondesktop_nofire_data
-from forecasting.simpleprophet.utils import get_latest_date
+from simpleprophet.output import reset_output_table, write_forecasts
+from simpleprophet.data import get_kpi_data, get_nondesktop_data
+from simpleprophet.data import get_nondesktop_nofire_data
+from simpleprophet.utils import get_latest_date
 
 
 FIRST_MODEL_DATES = {
@@ -30,24 +30,24 @@ FIRST_MODEL_DATES = {
       'nondesktop_nofire_tier1': pd.to_datetime("2019-03-08").date(),
 }
 FORECAST_HORIZON = pd.to_datetime("2020-12-31").date()
-BQ_PROJECT = "moz-fx-data-derived-datasets"
-BQ_DATASET = "analysis"
-BQ_TABLE = "jmccrosky_test"
+DEFAULT_BQ_PROJECT = "moz-fx-data-derived-datasets"
+DEFAULT_BQ_DATASET = "analysis"
+DEFAULT_BQ_TABLE = "jmccrosky_test"
 
 
-def update_table(bq_client):
+def update_table(bq_client, project_id=DEFAULT_BQ_PROJECT, dataset_id=DEFAULT_BQ_DATASET, table_id=DEFAULT_BQ_TABLE):
     kpi_data = get_kpi_data(bq_client)
     nondesktop_data = get_nondesktop_data(bq_client)
     nondesktop_nofire_data = get_nondesktop_nofire_data(bq_client)
     data = kpi_data
     data.update(nondesktop_data)
     data.update(nondesktop_nofire_data)
-    dataset = bq_client.dataset(BQ_DATASET)
-    tableref = dataset.table(BQ_TABLE)
+    dataset = bq_client.dataset(dataset_id)
+    tableref = dataset.table(table_id)
     table = bq_client.get_table(tableref)
     for product in data.keys():
         latest_date = get_latest_date(
-            bq_client, BQ_PROJECT, BQ_DATASET, BQ_TABLE, product, "asofdate"
+            bq_client, project_id, dataset_id, table_id, product, "asofdate"
         )
         if latest_date is not None:
             start_date = latest_date + timedelta(days=1)
@@ -64,14 +64,14 @@ def update_table(bq_client):
             )
 
 
-def replace_table(bq_client):
+def replace_table(bq_client, project_id=DEFAULT_BQ_PROJECT, dataset_id=DEFAULT_BQ_DATASET, table_id=DEFAULT_BQ_TABLE):
     kpi_data = get_kpi_data(bq_client)
     nondesktop_data = get_nondesktop_data(bq_client)
     nondesktop_nofire_data = get_nondesktop_nofire_data(bq_client)
     data = kpi_data
     data.update(nondesktop_data)
     data.update(nondesktop_nofire_data)
-    table = reset_ouput_table(bq_client, BQ_PROJECT, BQ_DATASET, BQ_TABLE)
+    table = reset_output_table(bq_client, project_id, dataset_id, table_id)
     for product in data.keys():
         model_dates = pd.date_range(
             FIRST_MODEL_DATES[product],

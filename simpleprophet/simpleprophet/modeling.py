@@ -6,7 +6,7 @@ from plotly.offline import plot
 import plotly.graph_objs as go
 from fbprophet.plot import add_changepoints_to_plot
 
-from forecasting.simpleprophet.utils import calc_mape
+from simpleprophet.utils import calc_mape
 
 
 def evaluate_model(model, data, end_date=None, title=None):
