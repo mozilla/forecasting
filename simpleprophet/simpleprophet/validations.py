@@ -8,7 +8,7 @@ from datetime import timedelta
 from collections import defaultdict
 from plotly.offline import plot
 import plotly.graph_objs as go
-from forecasting.simpleprophet.utils import match_dates, get_layout
+from simpleprophet.utils import match_dates, get_layout
 
 
 def _get_single_prediction(forecast_data, asofdate, target_date):
