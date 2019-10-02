@@ -41,6 +41,28 @@ python3 -m venv venv
 pip install -r requirements.txt
 ```
 
+From that directory, you should be able to start up a python interpreter
+and populate a new table with forecasts like:
+
+```
+from simpleprophet.pipeline import replace_table
+from google.cloud import bigquery
+
+bq_client = bigquery.Client()
+replace_table(bq_client, table_id='<your_username>_simpleprophet')
+```
+
+As you develop, any dependency updates need to be captured in
+`requirements.txt`. Upgrading `fbprophet` for example, could look like:
+
+```
+# Assumes you're in a venv with dependencies already installed.
+pip install --upgrade fbprophet
+
+# Save a snapshot of installed dependency versions back to the requirements file
+pip freeze > requirements.txt
+```
+
 ---
 
 For more information, contact jmccrosky@mozilla.com
