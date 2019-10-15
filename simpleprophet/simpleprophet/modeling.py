@@ -2,6 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+"""
+Tools for model development and evaluation.
+"""
 from plotly.offline import plot
 import plotly.graph_objs as go
 from fbprophet.plot import add_changepoints_to_plot

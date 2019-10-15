@@ -2,6 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+"""
+Tools for valdiation and evaluation of forecast models.
+"""
 import pandas as pd
 import numpy as np
 from datetime import timedelta
@@ -19,7 +22,9 @@ def _get_single_prediction(forecast_data, asofdate, target_date):
         return None
 
 
-def validate_stability(forecast_data_dict, asofdate_range, target_date, suppress_ci=False):
+def validate_stability(
+    forecast_data_dict, asofdate_range, target_date, suppress_ci=False
+):
     data = {}
     for forecast_data_key in forecast_data_dict:
         dates = []
@@ -84,12 +89,20 @@ def _get_metric_for_range(actual_data, forecast_data, asofdate, metric):
 
 
 def ValidateMetric(actual_data, forecast_data_dict, asofdate_range, metric, metric_name):
+    """
+    Produce a plot of an evaluation metric for a set of foreasting models over a
+    range of model dates.
+    """
     data = {}
     for k in forecast_data_dict:
         dates = []
         mapes = []
         for d in asofdate_range:
-            mapes.append(_get_metric_for_range(actual_data, forecast_data_dict[k], d, metric))
+            mapes.append(
+                _get_metric_for_range(
+                    actual_data, forecast_data_dict[k], d, metric
+                )
+            )
             dates.append(d)
         data[k] = pd.DataFrame({"date": dates, metric_name: mapes})
     return plot(
@@ -132,6 +145,10 @@ def _get_metric_trace(model, data, training_end_date, metric, metric_name):
 
 
 def validate_traces(model_gen, data, training_end_date_range, metric, metric_name):
+    """
+    Produce a plot of model traces over time, with a seperate trace for a range
+    of model dates.
+    """
     traces = []
     for d in training_end_date_range:
         traces.append(_get_metric_trace(model_gen(), data, d, metric, metric_name))
@@ -172,6 +189,10 @@ def _accumulate_horizon_metrics(
 def validate_metric_horizon(
     actual_data, forecast_data_dict, training_end_date_range, metric, metric_name
 ):
+    """
+    Produce a plot of an evaluation metric for a set of foreasting models over a
+    range of model horizons.
+    """
     data = {}
     for k in forecast_data_dict:
         metricValues = defaultdict(lambda: [])

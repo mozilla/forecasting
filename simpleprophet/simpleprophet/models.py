@@ -2,6 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+"""
+The current models and training data specification.
+"""
 from fbprophet import Prophet
 import pandas as pd
 from datetime import date, timedelta
