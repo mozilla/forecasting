@@ -12,7 +12,7 @@ The ```validations.py``` file contains code that produces plots to evaluate mode
 
 ## Modeling Strategy
 
-The ```models.py``` file contains the production model specifications.  The models were developed using the fbprophet framework by Jesse McCrosky.  The guiding modeling philosophy was to be guided by simplicity and intuitive fit, while informing the modeling process using conventional types of quantitative evidence.
+The ```models.py``` file contains the production model specifications.  The models were developed by Jesse McCrosky using the fbprophet framework.  The guiding modeling philosophy was to be guided by simplicity and intuitive fit, while informing the modeling process using conventional types of quantitative evidence.
 
 The evaluation of a forecast is fundamentally multi-dimensional.  As well as the competing objectives of stability, accuracy, and non-bias, each of these objectives can be evaluated on multiple time horizons.  This complexity makes a pure machine learning optimization approach extremely complex.
 
@@ -22,7 +22,7 @@ A few relevant model characteristics:
 
  - Due to the "smoothed" nature of MAU as a metric, yearly seasonality was adequate to capture all holiday effects except for Easter, which was included as a model component.
  - We select a start date for the training data based on the point where the metric appears to have reached a somewhat steady state in its development - the first weeks of most metrics are quite atypically and their use for training would not be helpful.
- - Similarly, some product metrics have "anomalies" - period during which the metric value was highly atypical, usually due to a data problem.  These periods were excluded from training data.
+ - Similarly, some product metrics have "anomalies" - periods during which the metric value was highly atypical, usually due to a data problem.  These periods were excluded from training data.
  - The appropriate start dates and anomaly periods were determined through manual examination of metric plots.
 
 
