@@ -2,6 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+"""
+Single functions for running the forecasting pipeline.
+"""
 import pandas as pd
 from datetime import timedelta
 
@@ -35,7 +38,10 @@ DEFAULT_BQ_DATASET = "analysis"
 DEFAULT_BQ_TABLE = "jmccrosky_test"
 
 
-def update_table(bq_client, project_id=DEFAULT_BQ_PROJECT, dataset_id=DEFAULT_BQ_DATASET, table_id=DEFAULT_BQ_TABLE):
+def update_table(
+    bq_client, project_id=DEFAULT_BQ_PROJECT, dataset_id=DEFAULT_BQ_DATASET,
+    table_id=DEFAULT_BQ_TABLE
+):
     kpi_data = get_kpi_data(bq_client)
     nondesktop_data = get_nondesktop_data(bq_client)
     nondesktop_nofire_data = get_nondesktop_nofire_data(bq_client)
@@ -64,7 +70,10 @@ def update_table(bq_client, project_id=DEFAULT_BQ_PROJECT, dataset_id=DEFAULT_BQ
             )
 
 
-def replace_table(bq_client, project_id=DEFAULT_BQ_PROJECT, dataset_id=DEFAULT_BQ_DATASET, table_id=DEFAULT_BQ_TABLE):
+def replace_table(
+    bq_client, project_id=DEFAULT_BQ_PROJECT, dataset_id=DEFAULT_BQ_DATASET,
+    table_id=DEFAULT_BQ_TABLE
+):
     kpi_data = get_kpi_data(bq_client)
     nondesktop_data = get_nondesktop_data(bq_client)
     nondesktop_nofire_data = get_nondesktop_nofire_data(bq_client)

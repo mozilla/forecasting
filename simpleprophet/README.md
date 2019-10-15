@@ -1,67 +1,30 @@
 # simpleprophet KPI forecasting models and tools
 
-This directory contains the simpleprophet forecast models and accompanying tools.  The simpleprophet models prioritize simplicity and stability, adding complexity and "bendiness" only when it significantly improves model performance on a holdback period.  More documentation to come.
+This directory contains the simpleprophet forecast models and accompanying tools.  The simpleprophet models prioritize simplicity and stability, adding complexity and "bendiness" only when it significantly improves model performance on a holdback period.
 
-## data.py
+## Usage
 
-Tools for getting metric actual or forecast data from BigQuery.
+The functions for running the forecasting pipeline are in ```pipeline.py```.  The ```update_table``` function can be run daily to add rows to the output table as necessary to incorporate newly available metrics data.  The ```replace_table``` function will clear the output table and regenerate it from scratch.
 
-## modeling.py
+For model-building the code in ```modeling.py``` may be useful.  It includes a function to evaluate a model on a holdout set and provide some useful visualizations.
 
-Tools for model development and evaluation.
+The ```validations.py``` file contains code that produces plots to evaluate model performance and validate the model behavior over time is reasonable.  It can also be used to compare multiple models.
 
-## models.py
+## Modeling Strategy
 
-The current models and training data specification.
+The ```models.py``` file contains the production model specifications.  The models were developed using the fbprophet framework by Jesse McCrosky.  The guiding modeling philosophy was to be guided by simplicity and intuitive fit, while informing the modeling process using conventional types of quantitative evidence.
 
-## output.py
+The evaluation of a forecast is fundamentally multi-dimensional.  As well as the competing objectives of stability, accuracy, and non-bias, each of these objectives can be evaluated on multiple time horizons.  This complexity makes a pure machine learning optimization approach extremely complex.
 
-Tools for writing forecasts to BigQuery.
+As an alternative, I chose to fit the models somewhat intuitively.  Parameter sets were explored iteratively and each iteration was evaluated visually to see if the model components (seasonality and trend) seemed to fit the observed actuals.  Once a reasonable parameter space was defined, the modeling process proceeded to evaluate holdout set metrics and other quantitative evaluations on a set of models.  Simpler models were preferred and complexity was only added when clearly justified by the quantitative evidence.
 
-## pipeline.py
+A few relevant model characteristics:
 
-Single functions for running the forecasting pipeline.
+ - Due to the "smoothed" nature of MAU as a metric, yearly seasonality was adequate to capture all holiday effects except for Easter, which was included as a model component.
+ - We select a start date for the training data based on the point where the metric appears to have reached a somewhat steady state in its development - the first weeks of most metrics are quite atypically and their use for training would not be helpful.
+ - Similarly, some product metrics have "anomalies" - period during which the metric value was highly atypical, usually due to a data problem.  These periods were excluded from training data.
+ - The appropriate start dates and anomaly periods were determined through manual examination of metric plots.
 
-## utils.py
-
-Various utility functions.
-
-## validation.py
-
-Tools for valdiation and evaluation of forecast models.
-
-## Local development
-
-To set up a local development environment, you'll need Python 3 and we
-recommend using a virtual environment:
-
-```
-cd simpleprophet/
-python3 -m venv venv
-pip install -r requirements.txt
-```
-
-From that directory, you should be able to start up a python interpreter
-and populate a new table with forecasts like:
-
-```
-from simpleprophet.pipeline import replace_table
-from google.cloud import bigquery
-
-bq_client = bigquery.Client()
-replace_table(bq_client, table_id='<your_username>_simpleprophet')
-```
-
-As you develop, any dependency updates need to be captured in
-`requirements.txt`. Upgrading `fbprophet` for example, could look like:
-
-```
-# Assumes you're in a venv with dependencies already installed.
-pip install --upgrade fbprophet
-
-# Save a snapshot of installed dependency versions back to the requirements file
-pip freeze > requirements.txt
-```
 
 ---
 
