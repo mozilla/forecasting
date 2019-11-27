@@ -1,0 +1,11 @@
+#!/bin/bash
+
+python3 - <<'EOF'
+
+from simpleprophet.pipeline import update_table
+from google.cloud import bigquery
+
+bq_client = bigquery.Client()
+# TODO: Change this target table to the production one.
+update_table(bq_client, table_id='klukas_simpleprophet')
+EOF
