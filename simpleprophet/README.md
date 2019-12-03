@@ -13,8 +13,8 @@ GOOGLE_APPLICATION_CREDENTIALS=/path/to/creds.json
 docker run -it \
   -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/key.json \
   -v $GOOGLE_APPLICATION_CREDENTIALS:/tmp/keys/key.json:ro \
-  gcr.io/moz-fx-data-forecasting/simpleprophet \
-  python
+  --entrypoint python \
+  gcr.io/moz-fx-data-forecasting/simpleprophet
 ```
 
 Or you can make code updates and build the image locally:
@@ -24,8 +24,8 @@ docker build . --tag simpleprophet
 docker run -it \
   -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/key.json \
   -v $GOOGLE_APPLICATION_CREDENTIALS:/tmp/keys/key.json:ro \
-  simpleprophet \
-  python
+  --entrypoint python \
+  simpleprophet
 ```
 
 If you want to produce a local environment outside docker, see the
