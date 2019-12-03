@@ -10,7 +10,9 @@ workflows:
     jobs:
     - gcp-gcr/build-and-push-image:
         # We rely on several environment variables provided to the CircleCI
-        # environment for authentication to GCR in a dataops sandbox project.
+        # environment for authentication to GCR in a dataops sandbox project;
+        # the service account we provide has GCS write access per
+        # https://cloud.google.com/container-registry/docs/access-control
         dockerfile: simpleprophet/Dockerfile
         path: simpleprophet
         image: simpleprophet
