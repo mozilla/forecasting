@@ -28,7 +28,9 @@ docker run -it \
   simpleprophet
 ```
 
-If you want to produce a local environment outside docker, see the
+If you want to produce a local environment outside docker, you can create an
+appropriate Conda environment via `conda env create -f environment.yml`.
+To create an environment outside Conda, see the
 [`fbprophet` installation instructions](https://facebook.github.io/prophet/docs/installation.html)
 and then use `pip install -r requirements.txt` to install remaining dependencies.
 

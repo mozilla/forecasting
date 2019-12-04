@@ -1,0 +1,9 @@
+name: simpleprophet
+channels:
+  - conda-forge
+dependencies:
+  - python==3.7
+  - fbprophet==0.5
+  - pip
+  - pip:
+    - -r file:requirements.txt
