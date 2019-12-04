@@ -16,7 +16,7 @@ from simpleprophet.models import setup_models, data_filter
 
 # Delete output table if necessary and create empty table with appropriate schema
 def reset_output_table(bigquery_client, project, dataset, table_name):
-    dataset_ref = bigquery_client.dataset(dataset)
+    dataset_ref = bigquery_client.dataset(dataset, project=project)
     table_ref = dataset_ref.table(table_name)
     try:
         bigquery_client.delete_table(table_ref)
