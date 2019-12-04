@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+
+"""
+Entrypoint script for running pipeline.update_table.
+"""
+
+import argparse
+
+from simpleprophet.pipeline import update_table
+from google.cloud import bigquery
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--project-id", "--project_id", help="destination project")
+parser.add_argument("--dataset-id", "--dataset_id", help="destination dataset")
+parser.add_argument("--table-id", "--table_id", help="destination table")
+args = parser.parse_args()
+kwargs = {k: v for k, v in vars(args).items() if v is not None}
+
+bq_client = bigquery.Client()
+update_table(bq_client, **kwargs)

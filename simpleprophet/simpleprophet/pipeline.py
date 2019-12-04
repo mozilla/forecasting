@@ -5,8 +5,10 @@
 """
 Single functions for running the forecasting pipeline.
 """
-import pandas as pd
 from datetime import timedelta
+import logging
+
+import pandas as pd
 
 from simpleprophet.output import reset_output_table, write_forecasts
 from simpleprophet.data import get_kpi_data, get_nondesktop_data
@@ -52,6 +54,7 @@ def update_table(
     tableref = dataset.table(table_id)
     table = bq_client.get_table(tableref)
     for product in data.keys():
+        logging.info("Processing forecasts for {}".format(product))
         latest_date = get_latest_date(
             bq_client, project_id, dataset_id, table_id, product, "asofdate"
         )
@@ -64,6 +67,7 @@ def update_table(
             data[product].ds.max() - timedelta(days=1)
         )
         for model_date in model_dates:
+            logging.info("Processing {} forecast for {}".format(product, model_date))
             write_forecasts(
                 bq_client, table, model_date.date(),
                 FORECAST_HORIZON, data[product], product
@@ -82,11 +86,13 @@ def replace_table(
     data.update(nondesktop_nofire_data)
     table = reset_output_table(bq_client, project_id, dataset_id, table_id)
     for product in data.keys():
+        logging.info("Processing forecasts for {}".format(product))
         model_dates = pd.date_range(
             FIRST_MODEL_DATES[product],
             data[product].ds.max() - timedelta(days=1)
         )
         for model_date in model_dates:
+            logging.info("Processing {} forecast for {}".format(product, model_date))
             write_forecasts(
                 bq_client, table, model_date.date(),
                 FORECAST_HORIZON, data[product], product

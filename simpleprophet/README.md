@@ -2,6 +2,38 @@
 
 This directory contains the simpleprophet forecast models and accompanying tools.  The simpleprophet models prioritize simplicity and stability, adding complexity and "bendiness" only when it significantly improves model performance on a holdback period.
 
+## Setup
+
+You will need a python environment with `fbprophet` and a few other
+dependencies installed. We provide a Docker image that can be pulled from GCR
+and run interactively like:
+
+```
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/creds.json
+docker run -it \
+  -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/key.json \
+  -v $GOOGLE_APPLICATION_CREDENTIALS:/tmp/keys/key.json:ro \
+  --entrypoint python \
+  gcr.io/moz-fx-data-forecasting/simpleprophet
+```
+
+Or you can make code updates and build the image locally:
+
+```
+docker build . --tag simpleprophet
+docker run -it \
+  -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/key.json \
+  -v $GOOGLE_APPLICATION_CREDENTIALS:/tmp/keys/key.json:ro \
+  --entrypoint python \
+  simpleprophet
+```
+
+If you want to produce a local environment outside docker, you can create an
+appropriate Conda environment via `conda env create -f environment.yml`.
+To create an environment outside Conda, see the
+[`fbprophet` installation instructions](https://facebook.github.io/prophet/docs/installation.html)
+and then use `pip install -r requirements.txt` to install remaining dependencies.
+
 ## Usage
 
 The functions for running the forecasting pipeline are in ```pipeline.py```.  The ```update_table``` function can be run daily to add rows to the output table as necessary to incorporate newly available metrics data.  The ```replace_table``` function will clear the output table and regenerate it from scratch.
@@ -24,7 +56,6 @@ A few relevant model characteristics:
  - We select a start date for the training data based on the point where the metric appears to have reached a somewhat steady state in its development - the first weeks of most metrics are quite atypically and their use for training would not be helpful.
  - Similarly, some product metrics have "anomalies" - periods during which the metric value was highly atypical, usually due to a data problem.  These periods were excluded from training data.
  - The appropriate start dates and anomaly periods were determined through manual examination of metric plots.
-
 
 ---
 
