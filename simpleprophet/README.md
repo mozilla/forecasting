@@ -8,7 +8,7 @@ You will need a python environment with `fbprophet` and a few other
 dependencies installed. We provide a Docker image that can be pulled from GCR
 and run interactively like:
 
-```
+```bash
 GOOGLE_APPLICATION_CREDENTIALS=/path/to/creds.json
 docker run -it \
   -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/key.json \
@@ -19,7 +19,7 @@ docker run -it \
 
 Or you can make code updates and build the image locally:
 
-```
+```bash
 docker build . --tag simpleprophet
 docker run -it \
   -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/key.json \
@@ -56,6 +56,12 @@ A few relevant model characteristics:
  - We select a start date for the training data based on the point where the metric appears to have reached a somewhat steady state in its development - the first weeks of most metrics are quite atypically and their use for training would not be helpful.
  - Similarly, some product metrics have "anomalies" - periods during which the metric value was highly atypical, usually due to a data problem.  These periods were excluded from training data.
  - The appropriate start dates and anomaly periods were determined through manual examination of metric plots.
+
+## Deploying
+
+To deploy to PyPI, admins on the repo can make a new release following semver
+(0.1.0, for example), which will trigger a CircleCI build that publishes
+a new package to PyPI with that tag name as the version.
 
 ---
 
