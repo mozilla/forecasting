@@ -36,7 +36,7 @@ def get_holidays(years):
     return easters
 
 
-def setup_models(years):
+def setupModels(years):
     models = {}
     models["desktop_global"] = Prophet(
         yearly_seasonality=20,
@@ -44,7 +44,7 @@ def setup_models(years):
         seasonality_mode='multiplicative',
         changepoint_prior_scale=0.015,
         seasonality_prior_scale=0.25,
-        holidays=get_holidays(years)
+        holidays=getHolidays(years)
     )
     models["nondesktop_global"] = Prophet()
     models["fxa_global"] = Prophet(
@@ -84,7 +84,7 @@ def setup_models(years):
         seasonality_mode='multiplicative',
         changepoint_prior_scale=0.008,
         seasonality_prior_scale=0.20,
-        holidays=get_holidays(years)
+        holidays=getHolidays(years)
     )
     models["nondesktop_nofire_tier1"] = Prophet(
         yearly_seasonality=20,
@@ -92,13 +92,29 @@ def setup_models(years):
         seasonality_mode='multiplicative',
         changepoint_prior_scale=0.008,
         seasonality_prior_scale=0.20,
-        holidays=get_holidays(years)
+        holidays=getHolidays(years)
+    )
+    models["nondesktop_nofire_global_2020"] = Prophet(
+        yearly_seasonality=20,
+        changepoint_range=0.75,
+        seasonality_mode='multiplicative',
+        changepoint_prior_scale=0.008,
+        seasonality_prior_scale=0.0002,
+        holidays=getHolidays(years)
+    )
+    models["nondesktop_nofire_tier1_2020"] = Prophet(
+        yearly_seasonality=20,
+        changepoint_range=0.75,
+        seasonality_mode='multiplicative',
+        changepoint_prior_scale=0.008,
+        seasonality_prior_scale=0.0002,
+        holidays=getHolidays(years)
     )
     return models
 
 
-def data_filter(data, product):
-    start_dates = {
+def dataFilter(data, product):
+    startDates = {
         "desktop_global": s2d('2016-04-08'),
         "fxa_global": s2d('2018-03-20'),
         "fxa_tier1": s2d('2018-03-20'),
@@ -112,19 +128,23 @@ def data_filter(data, product):
         "FirefoxConnect": s2d('2018-10-10'),
         "nondesktop_nofire_global": s2d('2017-01-30'),
         "nondesktop_nofire_tier1": s2d('2017-01-30'),
+        "nondesktop_nofire_global_2020": s2d('2017-01-30'),
+        "nondesktop_nofire_tier1_2020": s2d('2017-01-30'),
     }
 
     anomalyDates = {
         "desktop_global": [s2d('2019-05-16'), s2d('2019-06-07')],
         "Focus Android": [s2d('2018-09-01'), s2d('2019-03-01')],
         "Fennec iOS": [s2d('2017-11-08'), s2d('2017-12-31')],
+        "nondesktop_nofire_global_2020": [s2d('2017-11-10'), s2d('2018-03-11')],
+        "nondesktop_nofire_tier1_2020": [s2d('2017-11-10'), s2d('2018-03-11')],
     }
     temp = data.copy()
-    if product in start_dates:
-        start_date = start_dates[product]  # noqa: F841
-        temp = temp.query("ds >= @start_date")
+    if product in startDates:
+        startDate = startDates[product]  # noqa: F841
+        temp = temp.query("ds >= @startDate")
     if product in anomalyDates:
-        anomalystart_date = anomalyDates[product][0]  # noqa: F841
-        anomalyend_date = anomalyDates[product][1]  # noqa: F841
-        temp = temp.query("(ds < @anomalystart_date) | (ds > @anomalyend_date)")
+        anomalyStartDate = anomalyDates[product][0]  # noqa: F841
+        anomalyEndDate = anomalyDates[product][1]  # noqa: F841
+        temp = temp.query("(ds < @anomalyStartDate) | (ds > @anomalyEndDate)")
     return temp
