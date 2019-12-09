@@ -36,7 +36,7 @@ def get_holidays(years):
     return easters
 
 
-def setupModels(years):
+def setup_models(years):
     models = {}
     models["desktop_global"] = Prophet(
         yearly_seasonality=20,
@@ -44,7 +44,7 @@ def setupModels(years):
         seasonality_mode='multiplicative',
         changepoint_prior_scale=0.015,
         seasonality_prior_scale=0.25,
-        holidays=getHolidays(years)
+        holidays=get_holidays(years)
     )
     models["nondesktop_global"] = Prophet()
     models["fxa_global"] = Prophet(
@@ -84,7 +84,7 @@ def setupModels(years):
         seasonality_mode='multiplicative',
         changepoint_prior_scale=0.008,
         seasonality_prior_scale=0.20,
-        holidays=getHolidays(years)
+        holidays=get_holidays(years)
     )
     models["nondesktop_nofire_tier1"] = Prophet(
         yearly_seasonality=20,
@@ -92,7 +92,7 @@ def setupModels(years):
         seasonality_mode='multiplicative',
         changepoint_prior_scale=0.008,
         seasonality_prior_scale=0.20,
-        holidays=getHolidays(years)
+        holidays=get_holidays(years)
     )
     models["nondesktop_nofire_global_2020"] = Prophet(
         yearly_seasonality=20,
@@ -100,7 +100,7 @@ def setupModels(years):
         seasonality_mode='multiplicative',
         changepoint_prior_scale=0.008,
         seasonality_prior_scale=0.0002,
-        holidays=getHolidays(years)
+        holidays=get_holidays(years)
     )
     models["nondesktop_nofire_tier1_2020"] = Prophet(
         yearly_seasonality=20,
@@ -108,13 +108,13 @@ def setupModels(years):
         seasonality_mode='multiplicative',
         changepoint_prior_scale=0.008,
         seasonality_prior_scale=0.0002,
-        holidays=getHolidays(years)
+        holidays=get_holidays(years)
     )
     return models
 
 
-def dataFilter(data, product):
-    startDates = {
+def data_filter(data, product):
+    start_dates = {
         "desktop_global": s2d('2016-04-08'),
         "fxa_global": s2d('2018-03-20'),
         "fxa_tier1": s2d('2018-03-20'),
@@ -140,11 +140,11 @@ def dataFilter(data, product):
         "nondesktop_nofire_tier1_2020": [s2d('2017-11-10'), s2d('2018-03-11')],
     }
     temp = data.copy()
-    if product in startDates:
-        startDate = startDates[product]  # noqa: F841
-        temp = temp.query("ds >= @startDate")
+    if product in start_dates:
+        start_date = start_dates[product]  # noqa: F841
+        temp = temp.query("ds >= @start_date")
     if product in anomalyDates:
-        anomalyStartDate = anomalyDates[product][0]  # noqa: F841
-        anomalyEndDate = anomalyDates[product][1]  # noqa: F841
-        temp = temp.query("(ds < @anomalyStartDate) | (ds > @anomalyEndDate)")
+        anomalystart_date = anomalyDates[product][0]  # noqa: F841
+        anomalyend_date = anomalyDates[product][1]  # noqa: F841
+        temp = temp.query("(ds < @anomalystart_date) | (ds > @anomalyend_date)")
     return temp
