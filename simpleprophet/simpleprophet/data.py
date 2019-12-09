@@ -21,15 +21,17 @@ KPI_QUERIES = {
         ORDER BY
             date
     ''',
-    "nondesktop": '''
+    "mobile": '''
         SELECT
             submission_date as date,
-            sum(mau) AS global_mau,
-            SUM(IF(country IN ('US', 'FR', 'DE', 'GB', 'CA'), mau, 0)) AS tier1_mau
+            SUM(mau) AS global_mau,
+            SUM(tier1_mau) AS tier1_mau
         FROM
-            `moz-fx-data-derived-datasets.telemetry.firefox_nondesktop_exact_mau28_by_dimensions_v1`
+            `moz-fx-data-derived-datasets.telemetry.firefox_nondesktop_exact_mau28_by_product_v1`
+        WHERE
+            product != "FirefoxForFireTV"
         GROUP BY
-            date
+            submission_date
         ORDER BY
             date
     ''',
@@ -96,41 +98,6 @@ def get_nondesktop_data(bq_client):
         ].rename(
             index=str, columns={"date": "ds", "global_mau": "y"}
         )
-    for k in data:
-        data[k]['ds'] = pd.to_datetime(data[k]['ds']).dt.date
-    return data
-
-
-NONDESKTOP_NOFIRE_QUERY = '''
-    SELECT
-        submission_date as date,
-        SUM(mau) AS global_mau,
-        SUM(tier1_mau) AS tier1_mau
-
-    FROM
-        `moz-fx-data-derived-datasets.telemetry.firefox_nondesktop_exact_mau28_by_product_v1`
-    WHERE
-        product != "FirefoxForFireTV"
-    GROUP BY
-        submission_date
-    ORDER BY
-        date
-    '''
-
-
-def get_nondesktop_nofire_data(bq_client):
-    data = {}
-    raw_data = bq_client.query(NONDESKTOP_NOFIRE_QUERY).to_dataframe()
-    data['nondesktop_nofire_global'] = raw_data[
-        ["date", "global_mau"]
-    ].rename(
-        index=str, columns={"date": "ds", "global_mau": "y"}
-    )
-    data['nondesktop_nofire_tier1'] = raw_data[
-        ["date", "tier1_mau"]
-    ].rename(
-        index=str, columns={"date": "ds", "tier1_mau": "y"}
-    )
     for k in data:
         data[k]['ds'] = pd.to_datetime(data[k]['ds']).dt.date
     return data
