@@ -94,6 +94,22 @@ def setup_models(years):
         seasonality_prior_scale=0.20,
         holidays=get_holidays(years)
     )
+    models["nondesktop_nofire_global_2020"] = Prophet(
+        yearly_seasonality=20,
+        changepoint_range=0.75,
+        seasonality_mode='multiplicative',
+        changepoint_prior_scale=0.008,
+        seasonality_prior_scale=0.0002,
+        holidays=get_holidays(years)
+    )
+    models["nondesktop_nofire_tier1_2020"] = Prophet(
+        yearly_seasonality=20,
+        changepoint_range=0.75,
+        seasonality_mode='multiplicative',
+        changepoint_prior_scale=0.008,
+        seasonality_prior_scale=0.0002,
+        holidays=get_holidays(years)
+    )
     return models
 
 
@@ -112,12 +128,16 @@ def data_filter(data, product):
         "FirefoxConnect": s2d('2018-10-10'),
         "nondesktop_nofire_global": s2d('2017-01-30'),
         "nondesktop_nofire_tier1": s2d('2017-01-30'),
+        "nondesktop_nofire_global_2020": s2d('2017-01-30'),
+        "nondesktop_nofire_tier1_2020": s2d('2017-01-30'),
     }
 
     anomalyDates = {
         "desktop_global": [s2d('2019-05-16'), s2d('2019-06-07')],
         "Focus Android": [s2d('2018-09-01'), s2d('2019-03-01')],
         "Fennec iOS": [s2d('2017-11-08'), s2d('2017-12-31')],
+        "nondesktop_nofire_global_2020": [s2d('2017-11-10'), s2d('2018-03-11')],
+        "nondesktop_nofire_tier1_2020": [s2d('2017-11-10'), s2d('2018-03-11')],
     }
     temp = data.copy()
     if product in start_dates:
