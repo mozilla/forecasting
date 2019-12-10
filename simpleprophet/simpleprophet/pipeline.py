@@ -5,12 +5,13 @@
 """
 Single functions for running the forecasting pipeline.
 """
-from datetime import timedelta
+from datetime import timedelta, date
 import logging
 
+from google.cloud import bigquery
 import pandas as pd
 
-from simpleprophet.output import reset_output_table, write_forecasts
+from simpleprophet.output import reset_output_table, write_forecasts, prepare_records, write_records
 from simpleprophet.data import get_kpi_data, get_nondesktop_data
 from simpleprophet.utils import get_latest_date
 
@@ -35,6 +36,32 @@ FORECAST_HORIZON = pd.to_datetime("2020-12-31").date()
 DEFAULT_BQ_PROJECT = "moz-fx-data-derived-datasets"
 DEFAULT_BQ_DATASET = "analysis"
 DEFAULT_BQ_TABLE = "jmccrosky_test"
+
+
+def replace_single_day(
+    bq_client,
+    datasource,
+    dt,
+    project_id=DEFAULT_BQ_PROJECT,
+    dataset_id=DEFAULT_BQ_DATASET,
+    table_id=DEFAULT_BQ_TABLE,
+):
+    model_date = date.fromisoformat(dt)
+    data = {}
+    kpi_data = get_kpi_data(bq_client, types=[datasource])
+    data.update(kpi_data)
+    if datasource == 'mobile':
+        nondesktop_data = get_nondesktop_data(bq_client)
+        data.update(nondesktop_data)
+    partition_decorator = "$" + model_date.isoformat().replace('-', '')
+    table = '.'.join([project_id, dataset_id, table_id]) + partition_decorator
+    records = []
+    for product in data.keys():
+        logging.info("Processing {} forecast for {}".format(product, model_date))
+        records += prepare_records(model_date, FORECAST_HORIZON, data[product], product)
+    logging.info("Replacing results for {} in {}".format(model_date, table))
+    write_records(bq_client, records, table,
+                  write_disposition=bigquery.job.WriteDisposition.WRITE_TRUNCATE)
 
 
 def update_table(
