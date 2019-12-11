@@ -38,7 +38,7 @@ def get_holidays(years):
 
 def setup_models(years):
     models = {}
-    models["desktop_global"] = Prophet(
+    models["desktop_global_mau"] = Prophet(
         yearly_seasonality=20,
         changepoint_range=0.7,
         seasonality_mode='multiplicative',
@@ -46,37 +46,37 @@ def setup_models(years):
         seasonality_prior_scale=0.25,
         holidays=get_holidays(years)
     )
-    models["fxa_global"] = Prophet(
+    models["fxa_global_mau"] = Prophet(
         changepoint_range=0.8,
         changepoint_prior_scale=0.02,
     )
-    models["desktop_tier1"] = Prophet()
-    models["fxa_tier1"] = Prophet(
+    models["desktop_tier1_mau"] = Prophet()
+    models["fxa_tier1_mau"] = Prophet(
         changepoint_range=0.8,
         changepoint_prior_scale=0.02,
     )
-    models["Fennec Android"] = Prophet(
+    models["Fennec Android MAU"] = Prophet(
         changepoint_prior_scale=0.0005,
         seasonality_prior_scale=0.001,
         seasonality_mode='multiplicative'
     )
-    models["Focus iOS"] = Prophet(changepoint_prior_scale=0.0005)
-    models["Focus Android"] = Prophet(changepoint_prior_scale=0.005)
-    models["Fennec iOS"] = Prophet(
+    models["Focus iOS MAU"] = Prophet(changepoint_prior_scale=0.0005)
+    models["Focus Android MAU"] = Prophet(changepoint_prior_scale=0.005)
+    models["Fennec iOS MAU"] = Prophet(
         changepoint_prior_scale=0.005,
         seasonality_prior_scale=0.001,
         seasonality_mode='multiplicative'
     )
-    models["Fenix"] = Prophet(changepoint_prior_scale=0.0005)
-    models["Firefox Lite"] = Prophet(changepoint_prior_scale=0.0005)
-    models["FirefoxForFireTV"] = Prophet(
+    models["Fenix MAU"] = Prophet(changepoint_prior_scale=0.0005)
+    models["Firefox Lite MAU"] = Prophet(changepoint_prior_scale=0.0005)
+    models["FirefoxForFireTV MAU"] = Prophet(
         changepoint_prior_scale=0.0005,
         seasonality_prior_scale=0.005,
         seasonality_mode='multiplicative',
         yearly_seasonality=True
     )
-    models["FirefoxConnect"] = Prophet(changepoint_prior_scale=0.0005)
-    models["mobile_global"] = Prophet(
+    models["FirefoxConnect MAU"] = Prophet(changepoint_prior_scale=0.0005)
+    models["mobile_global_mau"] = Prophet(
         yearly_seasonality=20,
         changepoint_range=0.75,
         seasonality_mode='multiplicative',
@@ -84,7 +84,7 @@ def setup_models(years):
         seasonality_prior_scale=0.0002,
         holidays=get_holidays(years)
     )
-    models["mobile_tier1"] = Prophet(
+    models["mobile_tier1_mau"] = Prophet(
         yearly_seasonality=20,
         changepoint_range=0.75,
         seasonality_mode='multiplicative',
@@ -97,27 +97,27 @@ def setup_models(years):
 
 def data_filter(data, product):
     start_dates = {
-        "desktop_global": s2d('2016-04-08'),
-        "fxa_global": s2d('2018-03-20'),
-        "fxa_tier1": s2d('2018-03-20'),
-        "Fennec Android": s2d('2017-03-04'),
-        "Focus iOS": s2d('2017-12-06'),
-        "Focus Android": s2d('2017-07-17'),
-        "Fennec iOS": s2d('2017-03-03'),
-        "Fenix": s2d('2019-07-03'),
-        "Firefox Lite": s2d('2017-03-04'),
-        "FirefoxForFireTV": s2d('2018-02-04'),
-        "FirefoxConnect": s2d('2018-10-10'),
-        "mobile_global": s2d('2017-01-30'),
-        "mobile_tier1": s2d('2017-01-30'),
+        "desktop_global_mau": s2d('2016-04-08'),
+        "fxa_global_mau": s2d('2018-03-20'),
+        "fxa_tier1_mau": s2d('2018-03-20'),
+        "Fennec Android MAU": s2d('2017-03-04'),
+        "Focus iOS MAU": s2d('2017-12-06'),
+        "Focus Android MAU": s2d('2017-07-17'),
+        "Fennec iOS MAU": s2d('2017-03-03'),
+        "Fenix MAU": s2d('2019-07-03'),
+        "Firefox Lite MAU": s2d('2017-03-04'),
+        "FirefoxForFireTV MAU": s2d('2018-02-04'),
+        "FirefoxConnect MAU": s2d('2018-10-10'),
+        "mobile_global_mau": s2d('2017-01-30'),
+        "mobile_tier1_mau": s2d('2017-01-30'),
     }
 
     anomalyDates = {
-        "desktop_global": [s2d('2019-05-16'), s2d('2019-06-07')],
-        "Focus Android": [s2d('2018-09-01'), s2d('2019-03-01')],
-        "Fennec iOS": [s2d('2017-11-08'), s2d('2017-12-31')],
-        "mobile_global": [s2d('2017-11-10'), s2d('2018-03-11')],
-        "mobile_tier1": [s2d('2017-11-10'), s2d('2018-03-11')],
+        "desktop_global_mau": [s2d('2019-05-16'), s2d('2019-06-07')],
+        "Focus Android MAU": [s2d('2018-09-01'), s2d('2019-03-01')],
+        "Fennec iOS MAU": [s2d('2017-11-08'), s2d('2017-12-31')],
+        "mobile_global_mau": [s2d('2017-11-10'), s2d('2018-03-11')],
+        "mobile_tier1_mau": [s2d('2017-11-10'), s2d('2018-03-11')],
     }
     temp = data.copy()
     if product in start_dates:

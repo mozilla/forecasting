@@ -56,12 +56,12 @@ def get_kpi_data(bq_client, types=list(KPI_QUERIES.keys())):
         types = [types]
     for q in types:
         raw_data = bq_client.query(KPI_QUERIES[q]).to_dataframe()
-        data['{}_global'.format(q)] = raw_data[
+        data['{}_global_mau'.format(q)] = raw_data[
             ["date", "global_mau"]
         ].rename(
             index=str, columns={"date": "ds", "global_mau": "y"}
         )
-        data['{}_tier1'.format(q)] = raw_data[
+        data['{}_tier1_mau'.format(q)] = raw_data[
             ["date", "tier1_mau"]
         ].rename(
             index=str, columns={"date": "ds", "tier1_mau": "y"}
@@ -93,7 +93,7 @@ def get_nondesktop_data(bq_client):
         "Fennec Android", "Focus iOS", "Focus Android", "Fennec iOS", "Fenix",
         "Firefox Lite", "FirefoxForFireTV", "FirefoxConnect"
     ]:
-        data['{}'.format(p)] = raw_data.query("product == @p")[
+        data['{} MAU'.format(p)] = raw_data.query("product == @p")[
             ["date", "global_mau"]
         ].rename(
             index=str, columns={"date": "ds", "global_mau": "y"}

@@ -5,6 +5,7 @@
 """
 Tools for writing forecasts to BigQuery.
 """
+import json
 import pandas as pd
 import numpy as np
 from google.cloud import bigquery
@@ -14,15 +15,7 @@ from datetime import timedelta
 from simpleprophet.models import setup_models, data_filter
 
 
-# Delete output table if necessary and create empty table with appropriate schema
-def reset_output_table(bigquery_client, project, dataset, table_name):
-    dataset_ref = bigquery_client.dataset(dataset, project=project)
-    table_ref = dataset_ref.table(table_name)
-    try:
-        bigquery_client.delete_table(table_ref)
-    except NotFound:
-        pass
-    schema = [
+SCHEMA = [
         bigquery.SchemaField(
             "asofdate", "DATE", mode="REQUIRED",
             description="Latest date of actuals used for this model run"),
@@ -48,12 +41,22 @@ def reset_output_table(bigquery_client, project, dataset, table_name):
         bigquery.SchemaField('p{}'.format(q), 'FLOAT', mode='REQUIRED')
         for q in range(10, 100, 10)
     ]
-    table = bigquery.Table(table_ref, schema=schema)
+
+
+# Delete output table if necessary and create empty table with appropriate schema
+def reset_output_table(bigquery_client, project, dataset, table_name):
+    table_ref = '.'.join([project, dataset, table_name])
+    try:
+        bigquery_client.delete_table(table_ref)
+    except NotFound:
+        pass
+    table = bigquery.Table(table_ref, schema=SCHEMA)
+    table.time_partitioning = bigquery.table.TimePartitioning(field="asofdate")
     table = bigquery_client.create_table(table)
     return table
 
 
-def write_forecasts(bigquery_client, table, modelDate, forecast_end, data, product):
+def prepare_records(modelDate, forecast_end, data, product):
     minYear = data.ds.min().year
     maxYear = forecast_end.year
     years = range(minYear, maxYear + 1)
@@ -83,9 +86,28 @@ def write_forecasts(bigquery_client, table, modelDate, forecast_end, data, produ
       "asofdate", "datasource", "date", "type", "value", "low90", "high90",
       "p10", "p20", "p30", "p40", "p50", "p60", "p70", "p80", "p90"
     ]]
-    output_data['date'] = pd.to_datetime(output_data['date']).dt.date
-    errors = bigquery_client.insert_rows(
-        table,
-        list(output_data.itertuples(index=False, name=None))
+    # We convert dates to strings here as the BigQuery loading machinery
+    # writes out the records as JSON and expects ISO-formatted date strings.
+    output_data['asofdate'] = pd.to_datetime(output_data['asofdate']).dt.strftime('%Y-%m-%d')
+    output_data['date'] = output_data['date'].dt.strftime('%Y-%m-%d')
+    return output_data.to_dict('records')
+
+
+def write_records(bigquery_client, records, table, write_disposition):
+    job_config = bigquery.LoadJobConfig(
+        write_disposition=write_disposition,
+        schema=SCHEMA,
     )
-    assert errors == []
+    load_job = bigquery_client.load_table_from_json(
+        records,
+        table,
+        job_config=job_config,
+    )
+    # Wait for load job to complete; raises an exception if the job failed.
+    load_job.result()
+
+
+def write_forecasts(bigquery_client, table, modelDate, forecast_end, data, product,
+                    write_disposition=bigquery.job.WriteDisposition.WRITE_APPEND):
+    records = prepare_records(modelDate, forecast_end, data, product)
+    write_records(bigquery_client, records, table, write_disposition)

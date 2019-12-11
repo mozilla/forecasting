@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 
 """
-Entrypoint script for running pipeline.update_table.
+Entrypoint script for running pipeline.replace_single_day.
 """
 
 import argparse
 
-from simpleprophet.pipeline import update_table
+from simpleprophet.pipeline import replace_single_day
 from google.cloud import bigquery
 
 parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("dt", help="model date to process")
 parser.add_argument("--project-id", "--project_id", help="destination project")
 parser.add_argument("--dataset-id", "--dataset_id", help="destination dataset")
 parser.add_argument("--table-id", "--table_id", help="destination table")
+parser.add_argument("--datasource", help="one of: desktop, mobile, fxa")
 args = parser.parse_args()
 kwargs = {k: v for k, v in vars(args).items() if v is not None}
 
-bq_client = bigquery.Client()
-update_table(bq_client, **kwargs)
+bq_client = bigquery.Client(args.project_id)
+replace_single_day(bq_client, **kwargs)
