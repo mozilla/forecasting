@@ -70,7 +70,7 @@ def prepare_records(modelDate, forecast_end, data, product):
     )
     forecast = models[product].predict(forecast_period)
     output_data = {
-        "asofdate": modelDate.isoformat(),
+        "asofdate": modelDate,
         "datasource": product,
         "date": forecast.ds,
         "type": "forecast",
@@ -86,6 +86,9 @@ def prepare_records(modelDate, forecast_end, data, product):
       "asofdate", "datasource", "date", "type", "value", "low90", "high90",
       "p10", "p20", "p30", "p40", "p50", "p60", "p70", "p80", "p90"
     ]]
+    # We convert dates to strings here as the BigQuery loading machinery
+    # writes out the records as JSON and expects ISO-formatted date strings.
+    output_data['asofdate'] = pd.to_datetime(output_data['asofdate']).dt.strftime('%Y-%m-%d')
     output_data['date'] = output_data['date'].dt.strftime('%Y-%m-%d')
     return output_data.to_dict('records')
 
