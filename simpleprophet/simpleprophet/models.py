@@ -37,6 +37,29 @@ def get_holidays(years):
 
 
 def setup_models(years):
+    release_cycles = pd.DataFrame({
+        "ds": [
+            s2d("2018-05-09"), s2d("2018-06-26"), s2d("2018-09-05"), s2d("2018-10-23"),
+            s2d("2018-12-11"), s2d("2019-01-29 "), s2d("2019-03-19"), s2d("2019-05-21"),
+            s2d("2019-07-09"), s2d("2019-09-03"), s2d("2019-10-22"), s2d("2019-12-03"),
+            s2d("2020-01-07"), s2d("2020-02-11"), s2d("2020-03-10"), s2d("2020-04-07"),
+            s2d("2020-05-05"), s2d("2020-06-02"), s2d("2020-06-30"), s2d("2020-07-28"),
+            s2d("2020-08-25"), s2d("2020-09-22"), s2d("2020-10-20"), s2d("2020-11-17"),
+            s2d("2020-12-15"),
+        ],
+        "holiday": "release",
+        "lower_window": 0,
+        "upper_window": 69
+    })
+
+    monitor_pushes = pd.DataFrame({
+        "ds": [
+            s2d("2019-11-25")
+        ],
+        "holiday": "monitor_push",
+        "lower_window": 0,
+        "upper_window": 30
+    })
     models = {}
     models["desktop_global_mau"] = Prophet(
         yearly_seasonality=20,
@@ -47,13 +70,21 @@ def setup_models(years):
         holidays=get_holidays(years)
     )
     models["fxa_global_mau"] = Prophet(
-        changepoint_range=0.8,
+        changepoint_range=0.9,
         changepoint_prior_scale=0.02,
+        seasonality_prior_scale=0.00002,
+        holidays=pd.concat([release_cycles, monitor_pushes], ignore_index=True),
+        seasonality_mode='multiplicative',
+        yearly_seasonality=10,
     )
     models["desktop_tier1_mau"] = Prophet()
     models["fxa_tier1_mau"] = Prophet(
-        changepoint_range=0.8,
+        changepoint_range=0.9,
         changepoint_prior_scale=0.02,
+        seasonality_prior_scale=0.00002,
+        holidays=pd.concat([release_cycles, monitor_pushes], ignore_index=True),
+        seasonality_mode='multiplicative',
+        yearly_seasonality=10,
     )
     models["Fennec Android MAU"] = Prophet(
         changepoint_prior_scale=0.0005,
