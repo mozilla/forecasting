@@ -171,6 +171,8 @@ def setup_models(years):
 def data_filter(data, product):
     start_dates = {
         "desktop_global_mau": s2d('2016-04-08'),
+        "mobile_global_mau": s2d('2017-01-30'),
+        "mobile_tier1_mau": s2d('2017-01-30'),
         "fxa_global_mau": s2d('2018-03-20'),
         "fxa_tier1_mau": s2d('2018-03-20'),
         "Fennec Android MAU": s2d('2017-03-04'),
@@ -181,8 +183,8 @@ def data_filter(data, product):
         "Firefox Lite MAU": s2d('2017-03-04'),
         "FirefoxForFireTV MAU": s2d('2018-02-04'),
         "FirefoxConnect MAU": s2d('2018-10-10'),
-        "mobile_global_mau": s2d('2017-01-30'),
-        "mobile_tier1_mau": s2d('2017-01-30'),
+        "Lockwise Android MAU": s2d('2017-01-30'),  # Not validated
+        "Lockwise Android tier1 MAU": s2d('2017-01-30'),
     }
 
     anomalyDates = {
