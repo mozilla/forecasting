@@ -50,11 +50,18 @@ KPI_QUERIES = {
 }
 
 
-def get_kpi_data(bq_client, types=list(KPI_QUERIES.keys())):
+def get_kpi_data(bq_client, types=tuple(KPI_QUERIES.keys())):
     data = {}
-    if not isinstance(types, list):
+    if isinstance(types, str):
         types = [types]
     for q in types:
+        # Normalize the type name.
+        for k in KPI_QUERIES.keys():
+            if q == k.lower():
+                q = k
+                break
+        else:
+            raise ValueError('{} is not a valid KPI type'.format(q))
         raw_data = bq_client.query(KPI_QUERIES[q]).to_dataframe()
         data['{} Global MAU'.format(q)] = raw_data[
             ["date", "global_mau"]
