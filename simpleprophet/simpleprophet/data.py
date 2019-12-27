@@ -75,6 +75,7 @@ NONDESKTOP_QUERY = '''
     SELECT
         submission_date as date,
         SUM(mau) AS global_mau,
+        SUM(tier1_mau) AS tier1_mau,
         product
     FROM
         `moz-fx-data-derived-datasets.telemetry.firefox_nondesktop_exact_mau28_by_product_v1`
@@ -91,12 +92,17 @@ def get_nondesktop_data(bq_client):
     raw_data = bq_client.query(NONDESKTOP_QUERY).to_dataframe()
     for p in [
         "Fennec Android", "Focus iOS", "Focus Android", "Fennec iOS", "Fenix",
-        "Firefox Lite", "FirefoxForFireTV", "FirefoxConnect"
+        "Firefox Lite", "FirefoxForFireTV", "FirefoxConnect", "Lockwise Android"
     ]:
         data['{} MAU'.format(p)] = raw_data.query("product == @p")[
             ["date", "global_mau"]
         ].rename(
             index=str, columns={"date": "ds", "global_mau": "y"}
+        )
+        data['{} tier1 MAU'.format(p)] = raw_data.query("product == @p")[
+            ["date", "tier1_mau"]
+        ].rename(
+            index=str, columns={"date": "ds", "tier1_mau": "y"}
         )
     for k in data:
         data[k]['ds'] = pd.to_datetime(data[k]['ds']).dt.date
