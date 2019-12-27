@@ -63,7 +63,7 @@ def replace_single_day(
     data = {}
     kpi_data = get_kpi_data(bq_client, types=[datasource])
     data.update(kpi_data)
-    if datasource == 'mobile':
+    if datasource.lower() == 'mobile':
         nondesktop_data = get_nondesktop_data(bq_client)
         data.update(nondesktop_data)
     partition_decorator = "$" + model_date.isoformat().replace('-', '')
