@@ -69,6 +69,23 @@ def setup_models(years):
         seasonality_prior_scale=0.25,
         holidays=get_holidays(years)
     )
+    models["desktop_tier1_mau"] = Prophet()  # Not validated
+    models["mobile_global_mau"] = Prophet(
+        yearly_seasonality=20,
+        changepoint_range=0.75,
+        seasonality_mode='multiplicative',
+        changepoint_prior_scale=0.008,
+        seasonality_prior_scale=0.0002,
+        holidays=get_holidays(years)
+    )
+    models["mobile_tier1_mau"] = Prophet(
+        yearly_seasonality=20,
+        changepoint_range=0.75,
+        seasonality_mode='multiplicative',
+        changepoint_prior_scale=0.008,
+        seasonality_prior_scale=0.0002,
+        holidays=get_holidays(years)
+    )
     models["fxa_global_mau"] = Prophet(
         changepoint_range=0.9,
         changepoint_prior_scale=0.02,
@@ -77,7 +94,6 @@ def setup_models(years):
         seasonality_mode='multiplicative',
         yearly_seasonality=10,
     )
-    models["desktop_tier1_mau"] = Prophet()
     models["fxa_tier1_mau"] = Prophet(
         changepoint_range=0.9,
         changepoint_prior_scale=0.02,
@@ -107,22 +123,48 @@ def setup_models(years):
         yearly_seasonality=True
     )
     models["FirefoxConnect MAU"] = Prophet(changepoint_prior_scale=0.0005)
-    models["mobile_global_mau"] = Prophet(
-        yearly_seasonality=20,
-        changepoint_range=0.75,
+    models["Lockwise Android MAU"] = Prophet(  # Not validated
+        changepoint_range=0.9,
+        changepoint_prior_scale=0.007,
         seasonality_mode='multiplicative',
-        changepoint_prior_scale=0.008,
-        seasonality_prior_scale=0.0002,
-        holidays=get_holidays(years)
     )
-    models["mobile_tier1_mau"] = Prophet(
-        yearly_seasonality=20,
-        changepoint_range=0.75,
+    models["Fennec Android tier1 MAU"] = Prophet(  # Not validated
+        changepoint_prior_scale=0.0005,
+        seasonality_prior_scale=0.001,
+        seasonality_mode='multiplicative'
+    )
+    models["Focus iOS tier1 MAU"] = Prophet(  # Not validated
+        changepoint_prior_scale=0.0005
+    )
+    models["Focus Android tier1 MAU"] = Prophet(  # Not validated
+        changepoint_prior_scale=0.005
+    )
+    models["Fennec iOS tier1 MAU"] = Prophet(  # Not validated
+        changepoint_prior_scale=0.005,
+        seasonality_prior_scale=0.001,
+        seasonality_mode='multiplicative'
+    )
+    models["Fenix tier1 MAU"] = Prophet(  # Not validated
+        changepoint_prior_scale=0.0005
+    )
+    models["Firefox Lite tier1 MAU"] = Prophet(  # Not validated
+        changepoint_prior_scale=0.0005
+    )
+    models["FirefoxForFireTV tier1 MAU"] = Prophet(  # Not validated
+        changepoint_prior_scale=0.0005,
+        seasonality_prior_scale=0.005,
         seasonality_mode='multiplicative',
-        changepoint_prior_scale=0.008,
-        seasonality_prior_scale=0.0002,
-        holidays=get_holidays(years)
+        yearly_seasonality=True
     )
+    models["FirefoxConnect tier1 MAU"] = Prophet(  # Not validated
+        changepoint_prior_scale=0.0005
+    )
+    models["Lockwise Android tier1 MAU"] = Prophet(
+        changepoint_range=0.9,
+        changepoint_prior_scale=0.007,
+        seasonality_mode='multiplicative',
+    )
+
     return models
 
 
