@@ -120,7 +120,7 @@ FORECAST_QUERY = '''
     SELECT
         date,
         asofdate,
-        mau,
+        value,
         low90,
         high90
     FROM
@@ -146,7 +146,7 @@ def get_forecast_data(
         asofdate_end=asofdate_end,
     )).to_dataframe().rename(columns={
         "date": "ds",
-        "mau": "yhat",
+        "value": "yhat",
         "high90": "yhat_upper",
         "low90": "yhat_lower",
     })
