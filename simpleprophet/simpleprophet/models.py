@@ -187,8 +187,11 @@ def data_filter(data, product):
 
     anomalyDates = {
         "Desktop Global MAU": [s2d('2019-05-16'), s2d('2019-06-07')],
+        "Desktop Tier1 MAU": [s2d('2019-05-16'), s2d('2019-06-07')],
         "Focus Android Global MAU": [s2d('2018-09-01'), s2d('2019-03-01')],
+        "Focus Android Tier1 MAU": [s2d('2018-09-01'), s2d('2019-03-01')],
         "Fennec iOS Global MAU": [s2d('2017-11-08'), s2d('2017-12-31')],
+        "Fennec iOS Tier1 MAU": [s2d('2017-11-08'), s2d('2017-12-31')],
         "Mobile Global MAU": [s2d('2017-11-10'), s2d('2018-03-11')],
         "Mobile Tier1 MAU": [s2d('2017-11-10'), s2d('2018-03-11')],
     }
