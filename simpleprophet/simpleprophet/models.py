@@ -40,7 +40,7 @@ def setup_models(years):
     release_cycles = pd.DataFrame({
         "ds": [
             s2d("2018-05-09"), s2d("2018-06-26"), s2d("2018-09-05"), s2d("2018-10-23"),
-            s2d("2018-12-11"), s2d("2019-01-29 "), s2d("2019-03-19"), s2d("2019-05-21"),
+            s2d("2018-12-11"), s2d("2019-01-29"), s2d("2019-03-19"), s2d("2019-05-21"),
             s2d("2019-07-09"), s2d("2019-09-03"), s2d("2019-10-22"), s2d("2019-12-03"),
             s2d("2020-01-07"), s2d("2020-02-11"), s2d("2020-03-10"), s2d("2020-04-07"),
             s2d("2020-05-05"), s2d("2020-06-02"), s2d("2020-06-30"), s2d("2020-07-28"),
@@ -76,7 +76,6 @@ def setup_models(years):
         seasonality_mode='multiplicative',
         changepoint_prior_scale=0.008,
         seasonality_prior_scale=0.0002,
-        holidays=get_holidays(years)
     )
     models["Mobile Tier1 MAU"] = Prophet(
         yearly_seasonality=20,
@@ -84,7 +83,6 @@ def setup_models(years):
         seasonality_mode='multiplicative',
         changepoint_prior_scale=0.008,
         seasonality_prior_scale=0.0002,
-        holidays=get_holidays(years)
     )
     models["FxA Global MAU"] = Prophet(
         changepoint_range=0.9,
