@@ -60,7 +60,7 @@ def get_kpi_data(bq_client, types=tuple(KPI_QUERIES.keys())):
             if q == k.lower():
                 q = k
                 break
-        else:
+        if q not in KPI_QUERIES.keys():
             raise ValueError('{} is not a valid KPI type'.format(q))
         raw_data = bq_client.query(KPI_QUERIES[q]).to_dataframe()
         data['{} Global MAU'.format(q)] = raw_data[
