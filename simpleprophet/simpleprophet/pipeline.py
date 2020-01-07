@@ -99,7 +99,7 @@ def update_table(
             start_date = FIRST_MODEL_DATES[product]
         model_dates = pd.date_range(
             start_date,
-            data[product].ds.max() - timedelta(days=1)
+            data[product].ds.max()
         )
         for model_date in model_dates:
             logging.info("Processing {} forecast for {}".format(product, model_date))
@@ -122,7 +122,7 @@ def replace_table(
         logging.info("Processing forecasts for {}".format(product))
         model_dates = pd.date_range(
             FIRST_MODEL_DATES[product],
-            data[product].ds.max() - timedelta(days=1)
+            data[product].ds.max()
         )
         for model_date in model_dates:
             logging.info("Processing {} forecast for {}".format(product, model_date))
