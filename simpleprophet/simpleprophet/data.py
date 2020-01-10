@@ -116,6 +116,45 @@ def get_nondesktop_data(bq_client):
     return data
 
 
+FXASUB_QUERY = '''
+    SELECT
+        DATE(timestamp) as date,
+        COUNT(DISTINCT jsonPayload.fields.user_id) as value,
+    FROM
+        `moz-fx-data-derived-datasets.telemetry.fxa_auth_events_v1`
+    CROSS JOIN
+        UNNEST(SPLIT(SUBSTR(
+            JSON_EXTRACT(jsonPayload.fields.user_properties, "$.newsletters"),
+            2,
+            LENGTH(JSON_EXTRACT(jsonPayload.fields.user_properties, "$.newsletters")) - 2
+        ))) subscrib
+    WHERE
+        jsonPayload.fields.event_type in (
+            'fxa_reg - email_confirmed','fxa_reg - complete'
+        )
+        AND jsonPayload.fields.country IN (
+            "United States", "Canada", "Germany", "France", "United Kingdom"
+        )
+        AND subscrib != ""
+        AND DATE(timestamp) > "2019-06-03"
+    GROUP BY 1
+    ORDER BY 1
+    '''
+
+
+def get_fxasub_data(bq_client):
+    name = 'FxA Registration with Subscription Tier1 DAU'
+    data = {}
+    raw_data = bq_client.query(FXASUB_QUERY).to_dataframe()
+    data[name] = raw_data[
+        ["date", "value"]
+    ].rename(
+        index=str, columns={"date": "ds", "value": "y"}
+    )
+    data[name]['ds'] = pd.to_datetime(data[name]['ds']).dt.date
+    return data
+
+
 FORECAST_QUERY = '''
     SELECT
         date,
