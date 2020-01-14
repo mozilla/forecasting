@@ -73,7 +73,7 @@ def setup_models(years):
         yearly_seasonality=20,
         changepoint_range=0.7,
         seasonality_mode='multiplicative',
-        changepoint_prior_scale=0.015,
+        changepoint_prior_scale=0.008,
         seasonality_prior_scale=0.25,
         holidays=get_holidays(years)
     )
