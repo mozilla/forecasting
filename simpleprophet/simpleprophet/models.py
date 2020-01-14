@@ -37,19 +37,27 @@ def get_holidays(years):
 
 
 def setup_models(years):
-    release_cycles = pd.DataFrame({
-        "ds": [
-            s2d("2018-05-09"), s2d("2018-06-26"), s2d("2018-09-05"), s2d("2018-10-23"),
-            s2d("2018-12-11"), s2d("2019-01-29"), s2d("2019-03-19"), s2d("2019-05-21"),
-            s2d("2019-07-09"), s2d("2019-09-03"), s2d("2019-10-22"), s2d("2019-12-03"),
-            s2d("2020-01-07"), s2d("2020-02-11"), s2d("2020-03-10"), s2d("2020-04-07"),
-            s2d("2020-05-05"), s2d("2020-06-02"), s2d("2020-06-30"), s2d("2020-07-28"),
-            s2d("2020-08-25"), s2d("2020-09-22"), s2d("2020-10-20"), s2d("2020-11-17"),
-            s2d("2020-12-15"),
-        ],
+    release_dates = [
+        s2d("2018-05-09"), s2d("2018-06-26"), s2d("2018-09-05"), s2d("2018-10-23"),
+        s2d("2018-12-11"), s2d("2019-01-29"), s2d("2019-03-19"), s2d("2019-05-21"),
+        s2d("2019-07-09"), s2d("2019-09-03"), s2d("2019-10-22"), s2d("2019-12-03"),
+        s2d("2020-01-07"), s2d("2020-02-11"), s2d("2020-03-10"), s2d("2020-04-07"),
+        s2d("2020-05-05"), s2d("2020-06-02"), s2d("2020-06-30"), s2d("2020-07-28"),
+        s2d("2020-08-25"), s2d("2020-09-22"), s2d("2020-10-20"), s2d("2020-11-17"),
+        s2d("2020-12-15"),
+    ]
+    release_cycles_69_day = pd.DataFrame({
+        "ds": release_dates,
         "holiday": "release",
         "lower_window": 0,
         "upper_window": 69
+    })
+
+    release_cycles_14_day = pd.DataFrame({
+        "ds": release_dates,
+        "holiday": "release",
+        "lower_window": 0,
+        "upper_window": 14
     })
 
     monitor_pushes = pd.DataFrame({
@@ -88,7 +96,7 @@ def setup_models(years):
         changepoint_range=0.9,
         changepoint_prior_scale=0.02,
         seasonality_prior_scale=0.00002,
-        holidays=pd.concat([release_cycles, monitor_pushes], ignore_index=True),
+        holidays=pd.concat([release_cycles_69_day, monitor_pushes], ignore_index=True),
         seasonality_mode='multiplicative',
         yearly_seasonality=10,
     )
@@ -96,7 +104,7 @@ def setup_models(years):
         changepoint_range=0.9,
         changepoint_prior_scale=0.02,
         seasonality_prior_scale=0.00002,
-        holidays=pd.concat([release_cycles, monitor_pushes], ignore_index=True),
+        holidays=pd.concat([release_cycles_69_day, monitor_pushes], ignore_index=True),
         seasonality_mode='multiplicative',
         yearly_seasonality=10,
     )
@@ -162,7 +170,11 @@ def setup_models(years):
         changepoint_prior_scale=0.007,
         seasonality_mode='multiplicative',
     )
-
+    models["FxA Registration with Subscription Tier1 DAU"] = Prophet(
+        seasonality_mode='additive',
+        changepoint_prior_scale=0.015,
+        holidays=release_cycles_14_day,
+    )
     return models
 
 
@@ -183,6 +195,7 @@ def data_filter(data, product):
         "FirefoxConnect Global MAU": s2d('2018-10-10'),
         "Lockwise Android Global MAU": s2d('2017-01-30'),  # Not validated
         "Lockwise Android Tier1 MAU": s2d('2017-01-30'),
+        "FxA Registration with Subscription Tier1 DAU": s2d('2019-06-04'),
     }
 
     anomalyDates = {
@@ -194,6 +207,8 @@ def data_filter(data, product):
         "Fennec iOS Tier1 MAU": [s2d('2017-11-08'), s2d('2017-12-31')],
         "Mobile Global MAU": [s2d('2017-11-10'), s2d('2018-03-11')],
         "Mobile Tier1 MAU": [s2d('2017-11-10'), s2d('2018-03-11')],
+        "FxA Registration with Subscription Tier1 DAU":
+            [s2d('2019-11-23'), s2d('2019-12-02')],
     }
     temp = data.copy()
     if product in start_dates:
