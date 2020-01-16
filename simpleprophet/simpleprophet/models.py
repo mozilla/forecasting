@@ -77,7 +77,14 @@ def setup_models(years):
         seasonality_prior_scale=0.25,
         holidays=get_holidays(years)
     )
-    models["Desktop Tier1 MAU"] = Prophet()  # Not validated
+    models["Desktop Tier1 MAU"] = Prophet(
+        yearly_seasonality=20,
+        changepoint_range=0.7,
+        seasonality_mode='multiplicative',
+        changepoint_prior_scale=0.008,
+        seasonality_prior_scale=0.25,
+        holidays=get_holidays(years)
+    )
     models["Mobile Global MAU"] = Prophet(
         yearly_seasonality=20,
         changepoint_range=0.75,
@@ -181,6 +188,7 @@ def setup_models(years):
 def data_filter(data, product):
     start_dates = {
         "Desktop Global MAU": s2d('2016-04-08'),
+        "Desktop Tier1 MAU": s2d('2016-04-08'),
         "Mobile Global MAU": s2d('2017-01-30'),
         "Mobile Tier1 MAU": s2d('2017-01-30'),
         "FxA Global MAU": s2d('2018-03-20'),
