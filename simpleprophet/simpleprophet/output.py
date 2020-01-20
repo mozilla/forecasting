@@ -62,6 +62,7 @@ def prepare_records(modelDate, forecast_end, data, product):
     models = setup_models(years)
     forecast_start = modelDate + timedelta(days=1)
     forecast_period = pd.DataFrame({'ds': pd.date_range(forecast_start, forecast_end)})
+    data = data.query("ds <= @modelDate")
     actuals_data = {
         "asofdate": modelDate,
         "datasource": product,
@@ -80,7 +81,7 @@ def prepare_records(modelDate, forecast_end, data, product):
       "p10", "p20", "p30", "p40", "p50", "p60", "p70", "p80", "p90"
     ]]
     data = data_filter(data, product)
-    models[product].fit(data.query("ds <= @modelDate"))
+    models[product].fit(data)
     forecast_samples = models[product].sample_posterior_predictive(
         models[product].setup_dataframe(forecast_period)
     )
