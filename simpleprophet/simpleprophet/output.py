@@ -5,7 +5,6 @@
 """
 Tools for writing forecasts to BigQuery.
 """
-import json
 import pandas as pd
 import numpy as np
 from google.cloud import bigquery
@@ -63,8 +62,26 @@ def prepare_records(modelDate, forecast_end, data, product):
     models = setup_models(years)
     forecast_start = modelDate + timedelta(days=1)
     forecast_period = pd.DataFrame({'ds': pd.date_range(forecast_start, forecast_end)})
+    data = data.query("ds <= @modelDate")
+    actuals_data = {
+        "asofdate": modelDate,
+        "datasource": product,
+        "date": data.ds,
+        "type": "actual",
+        "value": data.y,
+        "low90": None,
+        "high90": None,
+    }
+    actuals_data.update({
+        "p{}".format(q): None
+        for q in range(10, 100, 10)
+    })
+    actuals_data = pd.DataFrame(actuals_data)[[
+      "asofdate", "datasource", "date", "type", "value", "low90", "high90",
+      "p10", "p20", "p30", "p40", "p50", "p60", "p70", "p80", "p90"
+    ]]
     data = data_filter(data, product)
-    models[product].fit(data.query("ds <= @modelDate"))
+    models[product].fit(data)
     forecast_samples = models[product].sample_posterior_predictive(
         models[product].setup_dataframe(forecast_period)
     )
@@ -86,9 +103,12 @@ def prepare_records(modelDate, forecast_end, data, product):
       "asofdate", "datasource", "date", "type", "value", "low90", "high90",
       "p10", "p20", "p30", "p40", "p50", "p60", "p70", "p80", "p90"
     ]]
+    output_data = output_data.append(actuals_data, ignore_index=True)
     # We convert dates to strings here as the BigQuery loading machinery
     # writes out the records as JSON and expects ISO-formatted date strings.
-    output_data['asofdate'] = pd.to_datetime(output_data['asofdate']).dt.strftime('%Y-%m-%d')
+    output_data['asofdate'] = pd.to_datetime(
+        output_data['asofdate']
+    ).dt.strftime('%Y-%m-%d')
     output_data['date'] = output_data['date'].dt.strftime('%Y-%m-%d')
     return output_data.to_dict('records')
 
