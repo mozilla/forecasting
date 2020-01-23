@@ -66,7 +66,7 @@ def prepare_records(modelDate, forecast_end, data, product):
     actuals_data = {
         "asofdate": modelDate,
         "datasource": product,
-        "date": data.ds,
+        "date": pd.to_datetime(data.ds),
         "type": "actual",
         "value": data.y,
         "low90": None,
