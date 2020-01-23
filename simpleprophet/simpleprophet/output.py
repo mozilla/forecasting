@@ -31,13 +31,13 @@ SCHEMA = [
             "value", "FLOAT", mode="REQUIRED",
             description="Actual or forecasted value for the target metric"),
         bigquery.SchemaField(
-            "low90", "FLOAT", mode="REQUIRED",
+            "low90", "FLOAT", mode="NULLABLE",
             description="Low end of the credible interval around this value"),
         bigquery.SchemaField(
-            "high90", "FLOAT", mode="REQUIRED",
+            "high90", "FLOAT", mode="NULLABLE",
             description="High end of the credible interval around this value"),
     ] + [
-        bigquery.SchemaField('p{}'.format(q), 'FLOAT', mode='REQUIRED')
+        bigquery.SchemaField('p{}'.format(q), 'FLOAT', mode='NULLABLE')
         for q in range(10, 100, 10)
     ]
 
