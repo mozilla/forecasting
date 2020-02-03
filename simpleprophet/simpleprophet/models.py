@@ -87,16 +87,16 @@ def setup_models(years):
     )
     models["Mobile Global MAU"] = Prophet(
         yearly_seasonality=20,
-        changepoint_range=0.75,
+        changepoint_range=0.7,
         seasonality_mode='multiplicative',
-        changepoint_prior_scale=0.008,
+        changepoint_prior_scale=0.006,
         seasonality_prior_scale=0.0002,
     )
     models["Mobile Tier1 MAU"] = Prophet(
         yearly_seasonality=20,
-        changepoint_range=0.75,
+        changepoint_range=0.7,
         seasonality_mode='multiplicative',
-        changepoint_prior_scale=0.008,
+        changepoint_prior_scale=0.006,
         seasonality_prior_scale=0.0002,
     )
     models["FxA Global MAU"] = Prophet(
