@@ -30,8 +30,9 @@ def get_holidays(years):
     easters = pd.DataFrame({
         'ds': [e[1] for i in years for e in get_easters(i)],
         'holiday': [e[0] for i in years for e in get_easters(i)],
-        'lower_window': 0,
-        'upper_window': 0,
+        'lower_window': -3,
+        'upper_window': 28,
+        'prior_scale': 0.005
     })
     return easters
 
