@@ -9,7 +9,7 @@ import pandas as pd
 # Note we obtain the most recent geo for each profile, as updates to the IPGeo
 # database that we use create excessive noise.  Also note that we restrict to
 # the top 1000 cities according to DAU on an arbitrary day.
-_queries = {
+QUERIES = {
     "light_funnel_dau_city": '''
         WITH top_cities_t AS (
           SELECT
@@ -227,7 +227,7 @@ _queries = {
 
 def get_raw_data(bq_client, bq_storage_client, metric):
     return bq_client.query(
-        _queries[metric]
+        QUERIES[metric]
     ).result().to_dataframe(bqstorage_client=bq_storage_client)
 
 

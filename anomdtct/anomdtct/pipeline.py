@@ -6,9 +6,9 @@
 import pandas as pd
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
-from dscontrib.jmccrosky.forecast.utils import s2d
-from dscontrib.jmccrosky.anomdtct.data import get_raw_data, prepare_data
-from dscontrib.jmccrosky.anomdtct.forecast import forecast
+from anomdtct.utils import s2d
+from anomdtct.data import get_raw_data, prepare_data
+from anomdtct.forecast import forecast
 
 
 # Get full table for testing and debugging
