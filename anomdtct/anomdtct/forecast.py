@@ -5,7 +5,7 @@
 
 import pandas as pd
 from fbprophet import Prophet
-from dscontrib.jmccrosky.forecast.utils import s2d
+from anomdtct.utils import s2d
 
 # The only holidays we have identified the need to explicitly model are Chinese
 # New Year and Holi
