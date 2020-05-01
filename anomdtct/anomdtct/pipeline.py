@@ -9,7 +9,7 @@ from google.cloud.exceptions import NotFound
 from anomdtct.utils import s2d
 from anomdtct.data import get_raw_data, prepare_data
 from anomdtct.forecast import forecast
-from anomdtct.output import write_records
+from anomdtct.output import write_records, write_to_spreadsheet
 import logging
 
 
@@ -25,6 +25,8 @@ def replace_single_day(
     project_id=DEFAULT_BQ_PROJECT,
     dataset_id=DEFAULT_BQ_DATASET,
     table_id=DEFAULT_BQ_TABLE,
+    spreadsheet_id=None,
+    spreadsheet_key=None
 ):
     model_date = date.fromisoformat(dt)
     data = pipeline(bq_client, bq_storage_client)
@@ -36,6 +38,9 @@ def replace_single_day(
 
     write_records(bq_client, records, table,
                   write_disposition=bigquery.job.WriteDisposition.WRITE_TRUNCATE)
+
+    if spreadsheet_id is not None:
+        write_to_spreadsheet(data, spreadsheet_id, spreadsheet_key)
 
 
 # Run the pipeline and calculate the forecast data
