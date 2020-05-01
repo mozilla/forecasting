@@ -2,17 +2,44 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-
+from datetime import timedelta, date
 import pandas as pd
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 from anomdtct.utils import s2d
 from anomdtct.data import get_raw_data, prepare_data
 from anomdtct.forecast import forecast
+from anomdtct.output import write_records
+import logging
 
 
-# Write public data to BigQuery
-def pipeline(bq_client, bq_storage_client, output_bq_client):
+DEFAULT_BQ_PROJECT = "moz-fx-data-shared-prod"
+DEFAULT_BQ_DATASET = "analysis"
+DEFAULT_BQ_TABLE = "deviations"
+
+
+def replace_single_day(
+    bq_client,
+    bq_storage_client,
+    dt,
+    project_id=DEFAULT_BQ_PROJECT,
+    dataset_id=DEFAULT_BQ_DATASET,
+    table_id=DEFAULT_BQ_TABLE,
+):
+    model_date = date.fromisoformat(dt)
+    data = pipeline(bq_client, bq_storage_client)
+    partition_decorator = "$" + model_date.isoformat().replace('-', '')
+    table = '.'.join([project_id, dataset_id, table_id]) + partition_decorator
+
+    logging.info("Replacing results for {} in {}".format(model_date, table))
+    records = data.query("date = @model_date").to_dict('records')
+
+    write_records(bq_client, records, table,
+                  write_disposition=bigquery.job.WriteDisposition.WRITE_TRUNCATE)
+
+
+# Run the pipeline and calculate the forecast data
+def pipeline(bq_client, bq_storage_client):
     metrics = {
         "light_funnel_dau_city": "desktop_dau",
         "light_funnel_dau_country": "desktop_dau",
@@ -66,25 +93,5 @@ def pipeline(bq_client, bq_storage_client, output_bq_client):
                 ],
                 ignore_index=True
             )
-    dataset_ref = output_bq_client.dataset("analysis")
-    table_ref = dataset_ref.table("deviations")
-    try:
-        output_bq_client.delete_table(table_ref)
-    except NotFound:
-        pass
-    schema = [
-        bigquery.SchemaField('date', 'DATE', mode='REQUIRED'),
-        bigquery.SchemaField('metric', 'STRING', mode='REQUIRED'),
-        bigquery.SchemaField('deviation', 'FLOAT', mode='REQUIRED'),
-        bigquery.SchemaField('ci_deviation', 'FLOAT', mode='REQUIRED'),
-        bigquery.SchemaField('geography', 'STRING', mode='REQUIRED'),
-    ]
-    table = bigquery.Table(table_ref, schema=schema)
-    table = output_bq_client.create_table(table)
-    n = len(output_data)
-    for i in range(0, n, 10000):
-        errors = output_bq_client.insert_rows(
-            table,
-            list(output_data[i:min(i + 10000, n)].itertuples(index=False, name=None))
-        )
-    return (output_data, errors)
+
+    return output_data

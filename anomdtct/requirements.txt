@@ -1,3 +1,4 @@
 google-cloud-bigquery==1.20.0
 pandas==1.0.3
-fbprophet>=0.5
+google-cloud-bigquery-storage==0.8.0
+pyarrow==0.17.0 
