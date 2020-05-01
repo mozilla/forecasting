@@ -11,33 +11,6 @@ from anomdtct.data import get_raw_data, prepare_data
 from anomdtct.forecast import forecast
 
 
-# Get full table for testing and debugging
-def get_data(bq_client, bq_storage_client):
-    city_raw_data = get_raw_data(
-        bq_client,
-        bq_storage_client,
-        "light_funnel_dau_city"
-    )
-    (city_clean_data, city_clean_training_data) = prepare_data(
-        city_raw_data, s2d('2016-04-08'), s2d('2020-01-30')
-    )
-    city_forecast_data = forecast(city_clean_training_data, city_clean_data)
-
-    country_raw_data = get_raw_data(
-        bq_client,
-        bq_storage_client,
-        "light_funnel_dau_country"
-    )
-    (country_clean_data, country_clean_training_data) = prepare_data(
-        country_raw_data, s2d('2016-04-08'), s2d('2020-01-30')
-    )
-    country_forecast_data = forecast(
-        country_clean_training_data, country_clean_data
-    )
-    city_forecast_data.update(country_forecast_data)
-    return city_forecast_data
-
-
 # Write public data to BigQuery
 def pipeline(bq_client, bq_storage_client, output_bq_client):
     metrics = {
