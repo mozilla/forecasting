@@ -27,7 +27,7 @@ jobs:
 
 workflows:
   version: 2
-  build:
+  simpleprophet-build:
     jobs:
     - gcp-gcr/build-and-push-image:
         # This step relies on several environment variables provided to the
@@ -53,3 +53,12 @@ workflows:
             only: /[0-9.]*/
           branches:
             ignore: /.*/
+  anomdtct-build:
+    jobs:
+    - gcp-gcr/build-and-push-image:
+        dockerfile: anomdtct/Dockerfile
+        path: anomdtct
+        image: anomdtct
+        filters:
+          branches:
+            only: master
