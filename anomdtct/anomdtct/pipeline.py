@@ -38,6 +38,9 @@ def fit_models(
     dataset_id=DEFAULT_BQ_MODEL_CACHE_DATASET,
     table_id=DEFAULT_BQ_MODEL_CACHE_TABLE
 ):
+    training_start_date = '2016-04-08'
+    training_end_date = '2020-01-30'
+
     for metric in METRICS.keys():
         # overwrite existing table for caching models
         table = '.'.join([project_id, dataset_id, table_id])
@@ -46,10 +49,12 @@ def fit_models(
         raw_data = get_raw_data(
             bq_client,
             bq_storage_client,
-            metric
+            metric,
+            training_start_date,
+            training_end_date
         )
         clean_training_data = prepare_training_data(
-            raw_data, s2d('2016-04-08'), s2d('2020-01-30')
+            raw_data, s2d(training_start_date), s2d(training_end_date)
         )
         for c in clean_training_data.keys():
             if (len(clean_training_data[c]) < 600):
