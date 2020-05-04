@@ -60,7 +60,7 @@ def write_model(bigquery_client, table, record):
     )
 
     load_job = bigquery_client.load_table_from_json(
-        record,
+        [record],
         table,
         job_config=job_config,
     )

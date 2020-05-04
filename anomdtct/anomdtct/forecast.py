@@ -7,7 +7,6 @@ import pandas as pd
 import pickle
 from fbprophet import Prophet
 from anomdtct.utils import s2d
-from anomdtct.data import get_cached_model
 
 
 # The only holidays we have identified the need to explicitly model are Chinese
