@@ -5,19 +5,18 @@ from google.oauth2 import service_account
 import json
 
 
-SCHEMA = [
-    bigquery.SchemaField('date', 'DATE', mode='REQUIRED'),
-    bigquery.SchemaField('metric', 'STRING', mode='REQUIRED'),
-    bigquery.SchemaField('deviation', 'FLOAT', mode='REQUIRED'),
-    bigquery.SchemaField('ci_deviation', 'FLOAT', mode='REQUIRED'),
-    bigquery.SchemaField('geography', 'STRING', mode='REQUIRED'),
-]
-
-
 def write_records(bigquery_client, records, table, write_disposition):
+    schema = [
+        bigquery.SchemaField('date', 'DATE', mode='REQUIRED'),
+        bigquery.SchemaField('metric', 'STRING', mode='REQUIRED'),
+        bigquery.SchemaField('deviation', 'FLOAT', mode='REQUIRED'),
+        bigquery.SchemaField('ci_deviation', 'FLOAT', mode='REQUIRED'),
+        bigquery.SchemaField('geography', 'STRING', mode='REQUIRED'),
+    ]
+
     job_config = bigquery.LoadJobConfig(
         write_disposition=write_disposition,
-        schema=SCHEMA,
+        schema=schema,
     )
     load_job = bigquery_client.load_table_from_json(
         records,
@@ -45,3 +44,27 @@ def write_to_spreadsheet(data, spreadsheet_id, key):
             values=data.T.reset_index().T.values.tolist())
     ).execute()
     print('Sheet successfully Updated')
+
+
+def write_model(bigquery_client, table, record):
+    # writes the pickled models to a BigQuery table which serves as a cache
+
+    schema = [
+        bigquery.SchemaField('metric', 'STRING', mode='REQUIRED'),
+        bigquery.SchemaField('geography', 'STRING', mode='REQUIRED'),
+        bigquery.SchemaField('model', 'BYTES', mode='REQUIRED'),
+    ]
+
+    job_config = bigquery.LoadJobConfig(
+        write_disposition=bigquery.job.WriteDisposition.WRITE_APPEND,
+        schema=schema,
+    )
+
+    load_job = bigquery_client.load_table_from_json(
+        record,
+        table,
+        job_config=job_config,
+    )
+
+    # Wait for load job to complete; raises an exception if the job failed.
+    load_job.result()
