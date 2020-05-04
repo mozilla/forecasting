@@ -7,15 +7,61 @@ import pandas as pd
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 from anomdtct.utils import s2d
-from anomdtct.data import get_raw_data, prepare_data
-from anomdtct.forecast import forecast
-from anomdtct.output import write_records, write_to_spreadsheet
+from anomdtct.data import get_raw_data, prepare_data, get_data_for_date, prepare_training_data
+from anomdtct.forecast import forecast, fit_model
+from anomdtct.output import write_records, write_to_spreadsheet, write_model
 import logging
 
 
 DEFAULT_BQ_PROJECT = "moz-fx-data-shared-prod"
 DEFAULT_BQ_DATASET = "analysis"
 DEFAULT_BQ_TABLE = "deviations"
+
+DEFAULT_BQ_MODEL_CACHE_PROJECT = "moz-fx-data-shared-prod"
+DEFAULT_BQ_MODEL_CACHE_DATASET = "analysis"
+DEFAULT_BQ_MODEL_CACHE_TABLE = "deviations_model_cache"
+
+METRICS = {
+    "light_funnel_dau_city": "desktop_dau",
+    "light_funnel_dau_country": "desktop_dau",
+    "light_funnel_mean_active_hours_per_profile_city":
+        "mean_active_hours_per_client",
+    "light_funnel_mean_active_hours_per_profile_country":
+        "mean_active_hours_per_client",
+}
+
+
+def fit_models(    
+    bq_client,
+    bq_storage_client,
+    project_id=DEFAULT_BQ_MODEL_CACHE_PROJECT,
+    dataset_id=DEFAULT_BQ_MODEL_CACHE_DATASET,
+    table_id=DEFAULT_BQ_MODEL_CACHE_TABLE
+):
+    for metric in METRICS.keys():
+        raw_data = get_raw_data(
+            bq_client,
+            bq_storage_client,
+            metric
+        )
+        clean_training_data = prepare_training_data(
+            raw_data, s2d('2016-04-08'), s2d('2020-01-30')
+        )
+        for c in clean_training_data.keys():
+            if (len(clean_training_data[c]) < 600):
+                continue
+
+            pickled_model = fit_model(clean_training_data)
+
+            table = '.'.join([project_id, dataset_id, table_id])
+
+            record = {
+                "metric": metric,
+                "geography": c,
+                "model": pickled_model
+            }
+
+            write_model(bq_client, table, record)
 
 
 def replace_single_day(
@@ -25,11 +71,16 @@ def replace_single_day(
     project_id=DEFAULT_BQ_PROJECT,
     dataset_id=DEFAULT_BQ_DATASET,
     table_id=DEFAULT_BQ_TABLE,
+    model_cache_project_id=DEFAULT_BQ_MODEL_CACHE_PROJECT,
+    model_cache_dataset_id=DEFAULT_BQ_MODEL_CACHE_DATASET,
+    model_cache_table_id=DEFAULT_BQ_MODEL_CACHE_TABLE,
     spreadsheet_id=None,
     spreadsheet_key=None
 ):
     model_date = date.fromisoformat(dt)
-    data = pipeline(bq_client, bq_storage_client)
+    model_cache_table = '.'.join([model_cache_project_id, model_cache_dataset_id, model_cache_table_id])
+
+    data = pipeline(bq_client, bq_storage_client, model_date, model_cache_table)
     partition_decorator = "$" + model_date.isoformat().replace('-', '')
     table = '.'.join([project_id, dataset_id, table_id]) + partition_decorator
 
@@ -44,16 +95,7 @@ def replace_single_day(
 
 
 # Run the pipeline and calculate the forecast data
-def pipeline(bq_client, bq_storage_client):
-    metrics = {
-        "light_funnel_dau_city": "desktop_dau",
-        "light_funnel_dau_country": "desktop_dau",
-        "light_funnel_mean_active_hours_per_profile_city":
-            "mean_active_hours_per_client",
-        "light_funnel_mean_active_hours_per_profile_country":
-            "mean_active_hours_per_client",
-    }
-
+def pipeline(bq_client, bq_storage_client, model_date, model_cache_table):
     output_data = pd.DataFrame(
         {
             "date": [],
@@ -65,16 +107,16 @@ def pipeline(bq_client, bq_storage_client):
         columns=["date", "metric", "deviation", "ci_deviation", "geography"]
     )
 
-    for metric in metrics.keys():
-        raw_data = get_raw_data(
+    for metric in METRICS.keys():
+        raw_data = get_data_for_date(
             bq_client,
             bq_storage_client,
-            metric
+            metric,
+            model_date
         )
-        (clean_data, clean_training_data) = prepare_data(
-            raw_data, s2d('2016-04-08'), s2d('2020-01-30')
-        )
-        forecast_data = forecast(clean_training_data, clean_data)
+        clean_data = prepare_data(raw_data)
+
+        forecast_data = forecast(clean_data, bq_client, model_cache_table, metric)
 
         for geo in forecast_data:
             output_data = pd.concat(
@@ -85,7 +127,7 @@ def pipeline(bq_client, bq_storage_client):
                             "date": pd.to_datetime(
                                 forecast_data[geo].ds
                             ).dt.strftime("%Y-%m-%d"),
-                            "metric": metrics[metric],
+                            "metric": METRICS[metric],
                             "deviation": forecast_data[geo].delta,
                             "ci_deviation": forecast_data[geo].ci_delta,
                             "geography": geo,

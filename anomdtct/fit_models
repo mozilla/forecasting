@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+
+"""
+Entrypoint script for running pipeline.replace_single_day.
+"""
+
+import argparse
+
+from anomdtct.pipeline import fit_models
+from google.cloud import bigquery
+from google.cloud.bigquery_storage_v1beta1 import BigQueryStorageClient
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--project-id", "--project_id", help="destination project for the models to be cached")
+parser.add_argument("--dataset-id", "--dataset_id", help="destination dataset for the models to be cached")
+parser.add_argument("--table-id", "--table_id", help="destination table for the models to be cached")
+
+args = parser.parse_args()
+kwargs = {k: v for k, v in vars(args).items() if v is not None}
+
+bq_client = bigquery.Client(args.project_id)
+bq_storage_client = BigQueryStorageClient()
+
+fit_models(bq_client, bq_storage_client, **kwargs)

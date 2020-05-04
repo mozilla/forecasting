@@ -4,8 +4,11 @@
 
 
 import pandas as pd
+import pickle
 from fbprophet import Prophet
 from anomdtct.utils import s2d
+from anomdtct.data import get_cached_model
+
 
 # The only holidays we have identified the need to explicitly model are Chinese
 # New Year and Holi
@@ -75,36 +78,21 @@ islamic_republic_day = pd.DataFrame({
 })
 
 
-def forecast(training_data, all_data):
+def forecast(data, bq_client, model_cache_table, metric):
     forecast = {}
-    for c in all_data.keys():
-        if (len(training_data[c]) < 600):
-            continue
-        print("Starting with {}".format(c))
-        # We use a mostly "default" model as we find it to be highly robust and
-        # do not have resources to individually model each geo.  The only
-        # adjustments made are the holidays sspecified and multiplicative
-        # seasonality that is more appropriate, especially for regions in which
-        # Firefox usage has grown from near-zero in our training period.
-        model = Prophet(
-            holidays=pd.concat([
-                chinese_new_year, holi, easter_west, easter_east,
-                nowruz, islamic_republic_day,
-            ], ignore_index=True),
-            seasonality_mode='multiplicative'
-        )
-        model.fit(training_data[c])
+    for c in data.keys():
+        model = get_cached_model(bq_client, metric, c, model_cache_table)
+
         forecast_period = model.make_future_dataframe(
-            periods=(all_data[c].ds.max() - training_data[c].ds.max()).days,
+            periods=1,
             include_history=False
         )
-        if (len(forecast_period) < 10):
-            continue
+
         forecast[c] = model.predict(forecast_period)
         forecast[c]['ds'] = pd.to_datetime(forecast[c]['ds']).dt.date
         forecast[c] = forecast[c][["ds", "yhat", "yhat_lower", "yhat_upper"]]
         # We join the forecast with our full data to allow calculation of deviations.
-        forecast[c] = forecast[c].merge(all_data[c], on="ds", how="inner")
+        forecast[c] = forecast[c].merge(data[c], on="ds", how="inner")
         forecast[c]["delta"] = (forecast[c].y - forecast[c].yhat) / forecast[c].y
         forecast[c]["ci_delta"] = 0
         forecast[c].loc[
@@ -123,3 +111,40 @@ def forecast(training_data, all_data):
         )
         print("Done with {}".format(c))
     return forecast
+
+
+def fit_model(training_data, geo):
+    print("Starting with {}".format(geo))
+    # We use a mostly "default" model as we find it to be highly robust and
+    # do not have resources to individually model each geo.  The only
+    # adjustments made are the holidays sspecified and multiplicative
+    # seasonality that is more appropriate, especially for regions in which
+    # Firefox usage has grown from near-zero in our training period.
+    model = Prophet(
+        holidays=pd.concat([
+            chinese_new_year, holi, easter_west, easter_east,
+            nowruz, islamic_republic_day,
+        ], ignore_index=True),
+        seasonality_mode='multiplicative'
+    )
+    model.fit(training_data[geo])
+    
+    return pickle.dumps(model)
+
+
+def get_cached_model(bq_client, metric, geo, model_cache_table):
+    query = f'''
+      SELECT
+        model
+      FROM {model_cache_table}
+      WHERE
+        metric IS LIKE {metric} AND
+        geography IS LIKE {geo}
+    '''
+
+    result = list(bq_client.query(query).result())
+
+    if len(result) >= 1:
+      return pickle.loads(result[0]["model"])
+    else:
+      return None
