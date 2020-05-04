@@ -39,6 +39,10 @@ def fit_models(
     table_id=DEFAULT_BQ_MODEL_CACHE_TABLE
 ):
     for metric in METRICS.keys():
+        # overwrite existing table for caching models
+        table = '.'.join([project_id, dataset_id, table_id])
+        bq_client.delete_table(table)
+
         raw_data = get_raw_data(
             bq_client,
             bq_storage_client,
@@ -52,8 +56,6 @@ def fit_models(
                 continue
 
             pickled_model = fit_model(clean_training_data)
-
-            table = '.'.join([project_id, dataset_id, table_id])
 
             record = {
                 "metric": metric,
