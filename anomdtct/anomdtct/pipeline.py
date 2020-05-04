@@ -4,6 +4,7 @@
 
 from datetime import timedelta, date
 import pandas as pd
+from google.cloud.bigquery._helpers import _bytes_to_json
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 from anomdtct.utils import s2d
@@ -60,12 +61,12 @@ def fit_models(
             if (len(clean_training_data[c]) < 600):
                 continue
 
-            pickled_model = fit_model(clean_training_data)
+            pickled_model = fit_model(clean_training_data, c)
 
             record = {
                 "metric": metric,
                 "geography": c,
-                "model": pickled_model
+                "model": _bytes_to_json(pickled_model)
             }
 
             write_model(bq_client, table, record)
