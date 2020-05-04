@@ -17,7 +17,6 @@ parser.add_argument("--project-id", "--project_id", help="destination project")
 parser.add_argument("--dataset-id", "--dataset_id", help="destination dataset")
 parser.add_argument("--table-id", "--table_id", help="destination table")
 parser.add_argument("--spreadsheet-id", "--table_id", help="ID of the Google spreadsheet")
-parser.add_argument("--spreadsheet-key", "--table_id", help="Key for authenticating to Google spreadsheet")
 args = parser.parse_args()
 kwargs = {k: v for k, v in vars(args).items() if v is not None}
 
