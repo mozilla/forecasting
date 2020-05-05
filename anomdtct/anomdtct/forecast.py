@@ -82,12 +82,16 @@ def forecast(data, bq_client, model_cache_table, metric):
     for c in data.keys():
         model = get_cached_model(bq_client, metric, c, model_cache_table)
 
+        if model is None:
+            continue
+
         forecast_period = model.make_future_dataframe(
             periods=1,
             include_history=False
         )
 
         forecast[c] = model.predict(forecast_period)
+
         forecast[c]['ds'] = pd.to_datetime(forecast[c]['ds']).dt.date
         forecast[c] = forecast[c][["ds", "yhat", "yhat_lower", "yhat_upper"]]
         # We join the forecast with our full data to allow calculation of deviations.
@@ -108,7 +112,9 @@ def forecast(data, bq_client, model_cache_table, metric):
         ) / (
             forecast[c].yhat - forecast[c].yhat_lower
         )
+
         print("Done with {}".format(c))
+
     return forecast
 
 
@@ -137,8 +143,8 @@ def get_cached_model(bq_client, metric, geo, model_cache_table):
         model
       FROM {model_cache_table}
       WHERE
-        metric IS LIKE {metric} AND
-        geography IS LIKE {geo}
+        metric LIKE "{metric}" AND
+        geography LIKE "{geo}"
     '''
 
     result = list(bq_client.query(query).result())

@@ -92,7 +92,7 @@ def replace_single_day(
     table = '.'.join([project_id, dataset_id, table_id]) + partition_decorator
 
     logging.info("Replacing results for {} in {}".format(model_date, table))
-    records = data.query("date = @model_date").to_dict('records')
+    records = data.to_dict('records')
 
     write_records(bq_client, records, table,
                   write_disposition=bigquery.job.WriteDisposition.WRITE_TRUNCATE)
