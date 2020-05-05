@@ -78,13 +78,8 @@ QUERIES = {
         WITH geo_t AS (
           SELECT
             client_id,
-            geo
-          FROM (
-            SELECT
-              client_id,
-              country AS geo,
-            FROM `moz-fx-data-shared-prod.telemetry.clients_first_seen` AS cd_t
-          )
+            country AS geo
+          FROM `moz-fx-data-shared-prod.telemetry.clients_first_seen`
         )
         SELECT
           submission_date AS date,
@@ -172,13 +167,8 @@ QUERIES = {
         WITH geo_t AS (
           SELECT
             client_id,
-            geo
-          FROM (
-            SELECT
-              client_id,
-              country AS geo,
-            FROM `moz-fx-data-shared-prod.telemetry.clients_first_seen` AS cd_t
-          )
+            country AS geo
+          FROM `moz-fx-data-shared-prod.telemetry.clients_first_seen`
         )
         SELECT
           submission_date AS date,
@@ -233,6 +223,9 @@ def prepare_training_data(data, training_start, training_end):
 
 def prepare_data(data):
     clean_data = {}
+    # Suppress any geoXdate with less than 5000 profiles as per minimum
+    # aggregation standards for the policy this data will be released under.
+    data = data[data.dau >= 5000].drop(columns=["dau"])
     for c in data.geo.unique():
         # We don't want to include a region unless we have at least about
         # two years of training data for the model
