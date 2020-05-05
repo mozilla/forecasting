@@ -233,9 +233,6 @@ def prepare_training_data(data, training_start, training_end):
 
 def prepare_data(data):
     clean_data = {}
-    # Suppress any geoXdate with less than 5000 profiles as per minimum
-    # aggregation standards for the policy this data will be released under.
-    data = data[data.dau >= 5000].drop(columns=["dau"])
     for c in data.geo.unique():
         # We don't want to include a region unless we have at least about
         # two years of training data for the model
