@@ -5,27 +5,43 @@ This directory contains the models for anomaly detection developed by Jesse McCr
 ## Setup
 
 You will need a python environment with `fbprophet` and a few other
-dependencies installed. We provide a Docker image that can be pulled from GCR
-and run interactively like:
+dependencies installed.
+
+### Model fitting
+
+For making predictions, this pipeline expects that the forecasting models are cached in BigQuery.
+To calculate models, we provide a Docker image that can be pulled from GCR
+and run like:
 
 ```bash
 GOOGLE_APPLICATION_CREDENTIALS=/path/to/creds.json
 docker run -it \
   -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/key.json \
   -v $GOOGLE_APPLICATION_CREDENTIALS:/tmp/keys/key.json:ro \
-  --entrypoint python \
+  --entrypoint "/app/fit_models" \
   gcr.io/moz-fx-data-forecasting/anomdtct
 ```
 
-Or you can make code updates and build the image locally:
+### Forecasting
+
+Once models have been cached in BigQuery, they can be used to make predictions.
+We provide a Docker image that can be pulled from GCR and run like:
 
 ```bash
-docker build . --tag anomdtct
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/creds.json
 docker run -it \
   -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/key.json \
   -v $GOOGLE_APPLICATION_CREDENTIALS:/tmp/keys/key.json:ro \
-  --entrypoint python \
-  anomdtct
+  --entrypoint "/app/entrypoint 2020-05-04" \
+  gcr.io/moz-fx-data-forecasting/anomdtct
+```
+
+The `/app/entrypoint` script expects a date parameter.
+
+You can make code updates and build the image locally:
+
+```bash
+docker build . --tag anomdtct
 ```
 
 If you want to produce a local environment outside docker, you can create an
