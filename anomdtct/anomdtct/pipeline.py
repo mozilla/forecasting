@@ -15,11 +15,11 @@ import logging
 
 
 DEFAULT_BQ_PROJECT = "moz-fx-data-shared-prod"
-DEFAULT_BQ_DATASET = "analysis"
+DEFAULT_BQ_DATASET = "telemetry_derived"
 DEFAULT_BQ_TABLE = "deviations"
 
 DEFAULT_BQ_MODEL_CACHE_PROJECT = "moz-fx-data-shared-prod"
-DEFAULT_BQ_MODEL_CACHE_DATASET = "analysis"
+DEFAULT_BQ_MODEL_CACHE_DATASET = "telemetry_derived"
 DEFAULT_BQ_MODEL_CACHE_TABLE = "deviations_model_cache"
 
 METRICS = {
@@ -45,7 +45,6 @@ def fit_models(
     for metric in METRICS.keys():
         # overwrite existing table for caching models
         table = '.'.join([project_id, dataset_id, table_id])
-        bq_client.delete_table(table)
 
         raw_data = get_raw_data(
             bq_client,
@@ -57,6 +56,9 @@ def fit_models(
         clean_training_data = prepare_training_data(
             raw_data, s2d(training_start_date), s2d(training_end_date)
         )
+
+        records = []
+
         for c in clean_training_data.keys():
             if (len(clean_training_data[c]) < 600):
                 continue
@@ -69,7 +71,9 @@ def fit_models(
                 "model": _bytes_to_json(pickled_model)
             }
 
-            write_model(bq_client, table, record)
+            records.append(record)
+
+        write_model(bq_client, table, records)
 
 
 def replace_single_day(
