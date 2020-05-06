@@ -45,7 +45,7 @@ def write_to_spreadsheet(data, spreadsheet_id):
     print('Sheet successfully Updated')
 
 
-def write_model(bigquery_client, table, record):
+def write_model(bigquery_client, table, records):
     # writes the pickled models to a BigQuery table which serves as a cache
 
     schema = [
@@ -55,12 +55,12 @@ def write_model(bigquery_client, table, record):
     ]
 
     job_config = bigquery.LoadJobConfig(
-        write_disposition=bigquery.job.WriteDisposition.WRITE_APPEND,
+        write_disposition=bigquery.job.WriteDisposition.WRITE_TRUNCATE,
         schema=schema,
     )
 
     load_job = bigquery_client.load_table_from_json(
-        [record],
+        records,
         table,
         job_config=job_config,
     )
