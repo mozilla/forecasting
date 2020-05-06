@@ -20,7 +20,7 @@ DEFAULT_BQ_TABLE = "deviations"
 
 DEFAULT_BQ_MODEL_CACHE_PROJECT = "moz-fx-data-shared-prod"
 DEFAULT_BQ_MODEL_CACHE_DATASET = "telemetry_derived"
-DEFAULT_BQ_MODEL_CACHE_TABLE = "deviations_model_cache"
+DEFAULT_BQ_MODEL_CACHE_TABLE = "deviations_model_cache_v1"
 
 METRICS = {
     "light_funnel_dau_city": "desktop_dau",
@@ -42,10 +42,11 @@ def fit_models(
     training_start_date = '2016-04-08'
     training_end_date = '2020-01-30'
 
-    for metric in METRICS.keys():
-        # overwrite existing table for caching models
-        table = '.'.join([project_id, dataset_id, table_id])
+    # overwrite existing table for caching models
+    table = '.'.join([project_id, dataset_id, table_id])
+    bq_client.delete_table(table, not_found_ok=True)
 
+    for metric in METRICS.keys():
         raw_data = get_raw_data(
             bq_client,
             bq_storage_client,
