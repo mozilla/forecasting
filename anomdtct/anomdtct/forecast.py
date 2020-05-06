@@ -3,8 +3,10 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+from datetime import date
 import pandas as pd
 import pickle
+import logging
 from fbprophet import Prophet
 from anomdtct.utils import s2d
 
@@ -77,7 +79,7 @@ islamic_republic_day = pd.DataFrame({
 })
 
 
-def forecast(data, bq_client, model_cache_table, metric):
+def forecast(data, bq_client, model_cache_table, metric, model_date):
     forecast = {}
     for c in data.keys():
         model = get_cached_model(bq_client, metric, c, model_cache_table)
@@ -85,19 +87,22 @@ def forecast(data, bq_client, model_cache_table, metric):
         if model is None:
             continue
 
+        time_delta = (model_date - model.history_dates.max().date()).days
+
         forecast_period = model.make_future_dataframe(
-            periods=1,
+            periods=time_delta,
             include_history=False
         )
 
+        print(f"Run prediction for {c}")
         forecast[c] = model.predict(forecast_period)
-
         forecast[c]['ds'] = pd.to_datetime(forecast[c]['ds']).dt.date
         forecast[c] = forecast[c][["ds", "yhat", "yhat_lower", "yhat_upper"]]
         # We join the forecast with our full data to allow calculation of deviations.
         forecast[c] = forecast[c].merge(data[c], on="ds", how="inner")
         forecast[c]["delta"] = (forecast[c].y - forecast[c].yhat) / forecast[c].y
         forecast[c]["ci_delta"] = 0
+
         forecast[c].loc[
             forecast[c].delta > 0, "ci_delta"
         ] = (
