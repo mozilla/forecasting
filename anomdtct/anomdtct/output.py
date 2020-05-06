@@ -28,7 +28,9 @@ def write_records(bigquery_client, records, table, write_disposition):
 
 def write_to_spreadsheet(data, spreadsheet_id):
     scopes = [
-        'https://www.googleapis.com/auth/drive'
+        'https://www.googleapis.com/auth/drive',
+        'https://www.googleapis.com/auth/drive.file',
+        'https://www.googleapis.com/auth/spreadsheets'
     ]
 
     credentials, project = google.auth.default(scopes=scopes)

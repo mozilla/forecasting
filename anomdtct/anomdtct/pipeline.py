@@ -16,7 +16,7 @@ import logging
 
 DEFAULT_BQ_PROJECT = "moz-fx-data-shared-prod"
 DEFAULT_BQ_DATASET = "telemetry_derived"
-DEFAULT_BQ_TABLE = "deviations"
+DEFAULT_BQ_TABLE = "deviations_v1"
 
 DEFAULT_BQ_MODEL_CACHE_PROJECT = "moz-fx-data-shared-prod"
 DEFAULT_BQ_MODEL_CACHE_DATASET = "telemetry_derived"
@@ -128,7 +128,7 @@ def pipeline(bq_client, bq_storage_client, model_date, model_cache_table):
         )
         clean_data = prepare_data(raw_data)
 
-        forecast_data = forecast(clean_data, bq_client, model_cache_table, metric)
+        forecast_data = forecast(clean_data, bq_client, model_cache_table, metric, model_date)
 
         for geo in forecast_data:
             output_data = pd.concat(
