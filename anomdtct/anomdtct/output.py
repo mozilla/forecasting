@@ -55,7 +55,7 @@ def write_model(bigquery_client, table, records):
     ]
 
     job_config = bigquery.LoadJobConfig(
-        write_disposition=bigquery.job.WriteDisposition.WRITE_TRUNCATE,
+        write_disposition=bigquery.job.WriteDisposition.WRITE_APPEND,
         schema=schema,
     )
 
