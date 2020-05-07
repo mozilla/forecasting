@@ -16,7 +16,7 @@ import logging
 
 DEFAULT_BQ_PROJECT = "moz-fx-data-shared-prod"
 DEFAULT_BQ_DATASET = "telemetry_derived"
-DEFAULT_BQ_TABLE = "deviations_v1"
+DEFAULT_BQ_TABLE = "deviations_anomdtct_v1"
 
 DEFAULT_BQ_MODEL_CACHE_PROJECT = "moz-fx-data-shared-prod"
 DEFAULT_BQ_MODEL_CACHE_DATASET = "telemetry_derived"
