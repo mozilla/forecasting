@@ -87,7 +87,8 @@ def replace_single_day(
     model_cache_project_id=DEFAULT_BQ_MODEL_CACHE_PROJECT,
     model_cache_dataset_id=DEFAULT_BQ_MODEL_CACHE_DATASET,
     model_cache_table_id=DEFAULT_BQ_MODEL_CACHE_TABLE,
-    spreadsheet_id=None
+    spreadsheet_id=None,
+    spreadsheet_key=None,
 ):
     model_date = date.fromisoformat(dt)
     model_cache_table = '.'.join([model_cache_project_id, model_cache_dataset_id, model_cache_table_id])
@@ -102,8 +103,8 @@ def replace_single_day(
     write_records(bq_client, records, table,
                   write_disposition=bigquery.job.WriteDisposition.WRITE_TRUNCATE)
 
-    if spreadsheet_id is not None:
-        write_to_spreadsheet(data, spreadsheet_id)
+    if spreadsheet_id is not None and spreadsheet_key is not None:
+        write_to_spreadsheet(data, spreadsheet_id, spreadsheet_key)
 
 
 # Run the pipeline and calculate the forecast data

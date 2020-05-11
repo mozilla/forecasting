@@ -2,6 +2,7 @@ import google
 from google.cloud import bigquery
 import gspread
 from googleapiclient.discovery import build
+from google.oauth2 import service_account
 import json
 
 
@@ -26,14 +27,16 @@ def write_records(bigquery_client, records, table, write_disposition):
     # Wait for load job to complete; raises an exception if the job failed.
     load_job.result()
 
-def write_to_spreadsheet(data, spreadsheet_id):
+def write_to_spreadsheet(data, spreadsheet_id, key):
     scopes = [
         'https://www.googleapis.com/auth/drive',
         'https://www.googleapis.com/auth/drive.file',
         'https://www.googleapis.com/auth/spreadsheets'
     ]
 
-    credentials, project = google.auth.default(scopes=scopes)
+    service_account_info = json.loads(key)
+    credentials = service_account.Credentials.from_service_account_info(
+        service_account_info, scopes=scopes)
 
     service = build('sheets', 'v4', credentials=credentials)
     response_date = service.spreadsheets().values().update(
