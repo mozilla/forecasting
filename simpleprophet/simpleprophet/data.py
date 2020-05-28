@@ -121,7 +121,7 @@ FXASUB_QUERY = '''
         DATE(timestamp) as date,
         COUNT(DISTINCT jsonPayload.fields.user_id) as value,
     FROM
-        `moz-fx-data-derived-datasets.telemetry.fxa_auth_events_v1`
+        `moz-fx-data-shared-prod.firefox_accounts_derived.fxa_auth_events_v1`
     CROSS JOIN
         UNNEST(SPLIT(SUBSTR(
             JSON_EXTRACT(jsonPayload.fields.user_properties, "$.newsletters"),
