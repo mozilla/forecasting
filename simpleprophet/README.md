@@ -14,7 +14,7 @@ docker run -it \
   -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/key.json \
   -v $GOOGLE_APPLICATION_CREDENTIALS:/tmp/keys/key.json:ro \
   --entrypoint python \
-  gcr.io/moz-fx-data-forecasting/simpleprophet
+  gcr.io/moz-fx-data-airflow-prod-88e0/simpleprophet
 ```
 
 Or you can make code updates and build the image locally:
