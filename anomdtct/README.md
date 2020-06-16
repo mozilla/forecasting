@@ -19,7 +19,7 @@ docker run -it \
   -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/key.json \
   -v $GOOGLE_APPLICATION_CREDENTIALS:/tmp/keys/key.json:ro \
   --entrypoint "/app/fit_models" \
-  gcr.io/moz-fx-data-forecasting/anomdtct
+  gcr.io/moz-fx-data-airflow-prod-88e0/anomdtct
 ```
 
 ### Forecasting
@@ -33,7 +33,7 @@ docker run -it \
   -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/key.json \
   -v $GOOGLE_APPLICATION_CREDENTIALS:/tmp/keys/key.json:ro \
   --entrypoint "/app/entrypoint 2020-05-04" \
-  gcr.io/moz-fx-data-forecasting/anomdtct
+  gcr.io/moz-fx-data-airflow-prod-88e0/anomdtct
 ```
 
 The `/app/entrypoint` script expects a date parameter.
