@@ -47,6 +47,8 @@ workflows:
   anomdtct-build:
     jobs:
     - gcp-gcr/build-and-push-image:
+        # Context defined in https://bugzilla.mozilla.org/show_bug.cgi?id=1608958
+        context: data-eng-airflow-gcr
         dockerfile: anomdtct/Dockerfile
         path: anomdtct
         image: anomdtct
