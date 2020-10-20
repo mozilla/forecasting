@@ -15,7 +15,7 @@ KPI_QUERIES = {
             sum(mau) AS global_mau,
             SUM(IF(country IN ('US', 'FR', 'DE', 'GB', 'CA'), mau, 0)) AS tier1_mau
         FROM
-            `moz-fx-data-derived-datasets.telemetry.firefox_desktop_exact_mau28_by_dimensions_v1`
+            `moz-fx-data-shared-prod.telemetry.firefox_desktop_exact_mau28_by_dimensions_v1`
         GROUP BY
             date
         ORDER BY
@@ -27,9 +27,9 @@ KPI_QUERIES = {
             SUM(mau) AS global_mau,
             SUM(tier1_mau) AS tier1_mau
         FROM
-            `moz-fx-data-derived-datasets.telemetry.firefox_nondesktop_exact_mau28_by_product_v1`
+            `moz-fx-data-shared-prod.telemetry.firefox_nondesktop_exact_mau28_by_product_v1`
         WHERE
-            product != "FirefoxForFireTV"
+            contributes_to_2020_kpi
         GROUP BY
             submission_date
         ORDER BY
@@ -41,7 +41,7 @@ KPI_QUERIES = {
             SUM(mau) AS global_mau,
             SUM(seen_in_tier1_country_mau) AS tier1_mau
         FROM
-            `moz-fx-data-derived-datasets.telemetry.firefox_accounts_exact_mau28_by_dimensions_v1`
+            `moz-fx-data-shared-prod.telemetry.firefox_accounts_exact_mau28_by_dimensions_v1`
         GROUP BY
             submission_date
         ORDER BY
@@ -85,7 +85,7 @@ NONDESKTOP_QUERY = '''
         SUM(tier1_mau) AS tier1_mau,
         product
     FROM
-        `moz-fx-data-derived-datasets.telemetry.firefox_nondesktop_exact_mau28_by_product_v1`
+        `moz-fx-data-shared-prod.telemetry.firefox_nondesktop_exact_mau28_by_product_v1`
     GROUP BY
         submission_date,
         product
@@ -98,8 +98,8 @@ def get_nondesktop_data(bq_client):
     data = {}
     raw_data = bq_client.query(NONDESKTOP_QUERY).to_dataframe()
     for p in [
-        "Fennec Android", "Focus iOS", "Focus Android", "Fennec iOS", "Fenix",
-        "Firefox Lite", "FirefoxForFireTV", "FirefoxConnect", "Lockwise Android"
+        "Fennec", "Focus iOS", "Focus Android", "Firefox iOS", "Fenix",
+        "Firefox Lite", "Firefox Fire TV", "Firefox Echo", "Lockwise Android"
     ]:
         data['{} Global MAU'.format(p)] = raw_data.query("product == @p")[
             ["date", "global_mau"]
