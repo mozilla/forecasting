@@ -97,7 +97,7 @@ def get_nondesktop_data(bq_client):
     raw_data = bq_client.query(NONDESKTOP_QUERY).to_dataframe()
     for p in [
         "Fennec", "Focus iOS", "Focus Android", "Firefox iOS", "Fenix",
-        "Firefox Lite", "Firefox Fire TV", "Firefox Echo", "Lockwise Android"
+        "Firefox Lite", "Firefox Echo", "Lockwise Android"
     ]:
         data['{} Global MAU'.format(p)] = raw_data.query("product == @p")[
             ["date", "global_mau"]
