@@ -130,12 +130,6 @@ def setup_models(years):
     )
     models["Fenix Global MAU"] = Prophet(changepoint_prior_scale=0.0005)
     models["Firefox Lite Global MAU"] = Prophet(changepoint_prior_scale=0.0005)
-    models["Firefox Fire TV Global MAU"] = Prophet(
-        changepoint_prior_scale=0.0005,
-        seasonality_prior_scale=0.005,
-        seasonality_mode='multiplicative',
-        yearly_seasonality=True
-    )
     models["Firefox Echo Global MAU"] = Prophet(changepoint_prior_scale=0.0005)
     models["Lockwise Android Global MAU"] = Prophet(  # Not validated
         changepoint_range=0.9,
@@ -163,12 +157,6 @@ def setup_models(years):
     )
     models["Firefox Lite Tier1 MAU"] = Prophet(  # Not validated
         changepoint_prior_scale=0.0005
-    )
-    models["Firefox Fire TV Tier1 MAU"] = Prophet(  # Not validated
-        changepoint_prior_scale=0.0005,
-        seasonality_prior_scale=0.005,
-        seasonality_mode='multiplicative',
-        yearly_seasonality=True
     )
     models["Firefox Echo Tier1 MAU"] = Prophet(  # Not validated
         changepoint_prior_scale=0.0005
@@ -200,7 +188,6 @@ def data_filter(data, product):
         "Firefox iOS Global MAU": s2d('2017-03-03'),
         "Fenix Global MAU": s2d('2019-07-03'),
         "Firefox Lite Global MAU": s2d('2017-03-04'),
-        "Firefox Fire TV Global MAU": s2d('2018-02-04'),
         "Firefox Echo Global MAU": s2d('2018-10-10'),
         "Lockwise Android Global MAU": s2d('2017-01-30'),  # Not validated
         "Lockwise Android Tier1 MAU": s2d('2017-01-30'),
