@@ -28,8 +28,6 @@ KPI_QUERIES = {
             SUM(tier1_mau) AS tier1_mau
         FROM
             `moz-fx-data-shared-prod.telemetry.firefox_nondesktop_exact_mau28_by_product_v1`
-        WHERE
-            contributes_to_2020_kpi
         GROUP BY
             submission_date
         ORDER BY
