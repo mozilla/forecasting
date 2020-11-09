@@ -87,18 +87,12 @@ def setup_models(years):
         holidays=get_holidays(years)
     )
     models["Mobile Global MAU"] = Prophet(
-        yearly_seasonality=20,
-        changepoint_range=0.7,
-        seasonality_mode='multiplicative',
-        changepoint_prior_scale=0.006,
-        seasonality_prior_scale=0.0002,
+        changepoint_range=0.9,
+        changepoint_prior_scale=0.03
     )
     models["Mobile Tier1 MAU"] = Prophet(
-        yearly_seasonality=20,
-        changepoint_range=0.7,
-        seasonality_mode='multiplicative',
-        changepoint_prior_scale=0.006,
-        seasonality_prior_scale=0.0002,
+        changepoint_range=0.9,
+        changepoint_prior_scale=0.03
     )
     models["FxA Global MAU"] = Prophet(
         changepoint_range=0.9,
@@ -202,7 +196,11 @@ def data_filter(data, product):
         "Firefox iOS Global MAU": [s2d('2017-11-08'), s2d('2017-12-31')],
         "Firefox iOS Tier1 MAU": [s2d('2017-11-08'), s2d('2017-12-31')],
         "Mobile Global MAU": [s2d('2017-11-10'), s2d('2018-03-11')],
+        "Mobile Global MAU": [s2d('2019-12-04'), s2d('2020-01-27')],
+        "Mobile Global MAU": [s2d('2020-08-01'), s2d('2020-10-08')],
         "Mobile Tier1 MAU": [s2d('2017-11-10'), s2d('2018-03-11')],
+        "Mobile Tier1 MAU": [s2d('2019-12-04'), s2d('2020-01-27')],
+        "Mobile Tier1 MAU": [s2d('2020-08-01'), s2d('2020-10-08')],
         "FxA Registration with Subscription Tier1 DAU":
             [s2d('2019-11-23'), s2d('2019-12-02')],
     }
