@@ -215,8 +215,6 @@ def data_filter(data, product):
         start_date = start_dates[product]  # noqa: F841
         temp = temp.query("ds >= @start_date")
     if product in anomalyDates:
-        for i in range(len(anomalyDates[product])):
-            anomalystart_date = anomalyDates[product][i][0]  # noqa: F841
-            anomalyend_date = anomalyDates[product][i][1]  # noqa: F841
+        for anomalystart_date, anomalyend_date in anomalyDates[product]:
             temp = temp.query("(ds < @anomalystart_date) | (ds > @anomalyend_date)")
     return temp
