@@ -88,11 +88,15 @@ def setup_models(years):
     )
     models["Mobile Global MAU"] = Prophet(
         changepoint_range=0.9, 
-        changepoint_prior_scale=0.03
+        changepoint_prior_scale=0.03 
+        # change in Nov 2020 for better accuracy in forecasting w.r.t. Fennec to Fenix migration, 
+        # details see https://colab.research.google.com/drive/10vfzTOjiwnXODh1zwUtPVmtR8VqAKAtr#scrollTo=GMT0vF34251n
     )
     models["Mobile Tier1 MAU"] = Prophet(
         changepoint_range=0.9,
         changepoint_prior_scale=0.03
+        # change in Nov 2020 for better accuracy in forecasting w.r.t. Fennec to Fenix migration, 
+        # details see https://colab.research.google.com/drive/10vfzTOjiwnXODh1zwUtPVmtR8VqAKAtr#scrollTo=GMT0vF34251n
     )
     models["FxA Global MAU"] = Prophet(
         changepoint_range=0.9,
