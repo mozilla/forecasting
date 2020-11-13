@@ -87,18 +87,16 @@ def setup_models(years):
         holidays=get_holidays(years)
     )
     models["Mobile Global MAU"] = Prophet(
-        yearly_seasonality=20,
-        changepoint_range=0.7,
-        seasonality_mode='multiplicative',
-        changepoint_prior_scale=0.006,
-        seasonality_prior_scale=0.0002,
+        changepoint_range=0.9, 
+        changepoint_prior_scale=0.03 
+        # change in Nov 2020 for better accuracy in forecasting w.r.t. Fennec to Fenix migration, 
+        # details see https://colab.research.google.com/drive/10vfzTOjiwnXODh1zwUtPVmtR8VqAKAtr#scrollTo=GMT0vF34251n
     )
     models["Mobile Tier1 MAU"] = Prophet(
-        yearly_seasonality=20,
-        changepoint_range=0.7,
-        seasonality_mode='multiplicative',
-        changepoint_prior_scale=0.006,
-        seasonality_prior_scale=0.0002,
+        changepoint_range=0.9,
+        changepoint_prior_scale=0.03
+        # change in Nov 2020 for better accuracy in forecasting w.r.t. Fennec to Fenix migration, 
+        # details see https://colab.research.google.com/drive/10vfzTOjiwnXODh1zwUtPVmtR8VqAKAtr#scrollTo=GMT0vF34251n
     )
     models["FxA Global MAU"] = Prophet(
         changepoint_range=0.9,
@@ -195,14 +193,20 @@ def data_filter(data, product):
     }
 
     anomalyDates = {
-        "Desktop Global MAU": [s2d('2019-05-16'), s2d('2019-06-07')],
-        "Desktop Tier1 MAU": [s2d('2019-05-16'), s2d('2019-06-07')],
-        "Focus Android Global MAU": [s2d('2018-09-01'), s2d('2019-03-01')],
-        "Focus Android Tier1 MAU": [s2d('2018-09-01'), s2d('2019-03-01')],
-        "Firefox iOS Global MAU": [s2d('2017-11-08'), s2d('2017-12-31')],
-        "Firefox iOS Tier1 MAU": [s2d('2017-11-08'), s2d('2017-12-31')],
-        "Mobile Global MAU": [s2d('2017-11-10'), s2d('2018-03-11')],
-        "Mobile Tier1 MAU": [s2d('2017-11-10'), s2d('2018-03-11')],
+        "Desktop Global MAU": [[s2d('2019-05-16'), s2d('2019-06-07')]],
+        "Desktop Tier1 MAU": [[s2d('2019-05-16'), s2d('2019-06-07')]],
+        "Focus Android Global MAU": [[s2d('2018-09-01'), s2d('2019-03-01')]],
+        "Focus Android Tier1 MAU": [[s2d('2018-09-01'), s2d('2019-03-01')]],
+        "Firefox iOS Global MAU": [[s2d('2017-11-08'), s2d('2017-12-31')]],
+        "Firefox iOS Tier1 MAU": [[s2d('2017-11-08'), s2d('2017-12-31')]],
+        "Mobile Global MAU": [[s2d('2017-11-10'), s2d('2018-03-11')], 
+                              [s2d('2019-12-04'), s2d('2020-01-27')], # EoY 2019 paid UAC campaign
+                              [s2d('2020-08-01'), s2d('2020-10-08')], # Fennec-> Fenix transition
+                             ],
+        "Mobile Tier1 MAU": [[s2d('2017-11-10'), s2d('2018-03-11')], 
+                             [s2d('2019-12-04'), s2d('2020-01-27')], 
+                             [s2d('2020-08-01'), s2d('2020-10-08')],
+                            ],
         "FxA Registration with Subscription Tier1 DAU":
             [s2d('2019-11-23'), s2d('2019-12-02')],
     }
@@ -211,7 +215,6 @@ def data_filter(data, product):
         start_date = start_dates[product]  # noqa: F841
         temp = temp.query("ds >= @start_date")
     if product in anomalyDates:
-        anomalystart_date = anomalyDates[product][0]  # noqa: F841
-        anomalyend_date = anomalyDates[product][1]  # noqa: F841
-        temp = temp.query("(ds < @anomalystart_date) | (ds > @anomalyend_date)")
+        for anomalystart_date, anomalyend_date in anomalyDates[product]:
+            temp = temp.query("(ds < @anomalystart_date) | (ds > @anomalyend_date)")
     return temp
