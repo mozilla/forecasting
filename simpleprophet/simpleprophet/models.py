@@ -199,16 +199,16 @@ def data_filter(data, product):
         "Focus Android Tier1 MAU": [[s2d('2018-09-01'), s2d('2019-03-01')]],
         "Firefox iOS Global MAU": [[s2d('2017-11-08'), s2d('2017-12-31')]],
         "Firefox iOS Tier1 MAU": [[s2d('2017-11-08'), s2d('2017-12-31')]],
-        "Mobile Global MAU": [[s2d('2017-11-10'), s2d('2018-03-11')], 
+        "Mobile Global MAU": [[s2d('2017-11-10'), s2d('2018-03-11')],
                               [s2d('2019-12-04'), s2d('2020-01-27')], # EoY 2019 paid UAC campaign
                               [s2d('2020-08-01'), s2d('2020-10-08')], # Fennec-> Fenix transition
                              ],
-        "Mobile Tier1 MAU": [[s2d('2017-11-10'), s2d('2018-03-11')], 
-                             [s2d('2019-12-04'), s2d('2020-01-27')], 
+        "Mobile Tier1 MAU": [[s2d('2017-11-10'), s2d('2018-03-11')],
+                             [s2d('2019-12-04'), s2d('2020-01-27')],
                              [s2d('2020-08-01'), s2d('2020-10-08')],
                             ],
         "FxA Registration with Subscription Tier1 DAU":
-            [s2d('2019-11-23'), s2d('2019-12-02')],
+            [[s2d('2019-11-23'), s2d('2019-12-02')]],
     }
     temp = data.copy()
     if product in start_dates:
