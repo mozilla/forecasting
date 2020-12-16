@@ -18,7 +18,7 @@ QUERIES = {
             CONCAT(
               country, ":",
               geo_subdivision1, ":",
-              geo_subdivision2, ":",
+              IFNULL(geo_subdivision2, "??"), ":",
               city
             ) AS geo
           FROM `moz-fx-data-shared-prod.telemetry.clients_daily`
@@ -43,7 +43,7 @@ QUERIES = {
               CONCAT(
                 country, ":",
                 geo_subdivision1, ":",
-                geo_subdivision2, ":",
+                IFNULL(geo_subdivision2, "??"), ":",
                 cd_t.city
               ) AS geo
             FROM `moz-fx-data-shared-prod.telemetry.clients_first_seen` AS cd_t
@@ -51,7 +51,7 @@ QUERIES = {
             ON CONCAT(
                 country, ":",
                 geo_subdivision1, ":",
-                geo_subdivision2, ":",
+                IFNULL(geo_subdivision2, "??"), ":",
                 city
               ) = top_cities_t.geo
           )
@@ -106,7 +106,7 @@ QUERIES = {
             CONCAT(
               country, ":",
               geo_subdivision1, ":",
-              geo_subdivision2, ":",
+              IFNULL(geo_subdivision2, "??"), ":",
               city
             ) AS geo
           FROM `moz-fx-data-shared-prod.telemetry.clients_daily`
@@ -131,7 +131,7 @@ QUERIES = {
               CONCAT(
                 country, ":",
                 geo_subdivision1, ":",
-                geo_subdivision2, ":",
+                IFNULL(geo_subdivision2, "??"), ":",
                 cd_t.city
               ) AS geo
             FROM `moz-fx-data-shared-prod.telemetry.clients_first_seen` AS cd_t
@@ -139,7 +139,7 @@ QUERIES = {
             ON CONCAT(
                 country, ":",
                 geo_subdivision1, ":",
-                geo_subdivision2, ":",
+                IFNULL(geo_subdivision2, "??"), ":",
                 city
               ) = top_cities_t.geo
           )
