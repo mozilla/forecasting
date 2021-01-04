@@ -45,7 +45,7 @@ FIRST_MODEL_DATES = {
 
     'FxA Registration with Subscription Tier1 DAU': pd.to_datetime("2020-01-01").date(),
 }
-FORECAST_HORIZON = pd.to_datetime("2020-12-31").date()
+FORECAST_HORIZON = pd.to_datetime("2021-12-31").date()
 DEFAULT_BQ_PROJECT = "moz-fx-data-derived-datasets"
 DEFAULT_BQ_DATASET = "analysis"
 DEFAULT_BQ_TABLE = "jmccrosky_test"
