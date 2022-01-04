@@ -6,4 +6,4 @@ dependencies:
   - fbprophet==0.5
   - pip
   - pip:
-    - -r file:requirements.txt
+    - -r requirements.txt
