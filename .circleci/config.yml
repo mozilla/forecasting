@@ -2,7 +2,7 @@ version: 2.1
 
 # See https://circleci.com/orbs/registry/orb/circleci/gcp-gcr
 orbs:
-  gcp-gcr: circleci/gcp-gcr@0.6.1
+  gcp-gcr: circleci/gcp-gcr@0.13.0
 
 jobs:
   simpleprophet-pypi-deploy:
@@ -32,12 +32,12 @@ workflows:
     - gcp-gcr/build-and-push-image:
         # Context defined in https://bugzilla.mozilla.org/show_bug.cgi?id=1608958
         context: data-eng-airflow-gcr
-        dockerfile: simpleprophet/Dockerfile
         path: simpleprophet
         image: simpleprophet
-        filters:
-          branches:
-            only: main
+        docker-context: simpleprophet
+        # filters:
+        #   branches:
+        #     only: main
     - simpleprophet-pypi-deploy:
         filters:
           tags:
@@ -49,9 +49,9 @@ workflows:
     - gcp-gcr/build-and-push-image:
         # Context defined in https://bugzilla.mozilla.org/show_bug.cgi?id=1608958
         context: data-eng-airflow-gcr
-        dockerfile: anomdtct/Dockerfile
         path: anomdtct
         image: anomdtct
-        filters:
-          branches:
-            only: main
+        docker-context: anomdtct
+        # filters:
+        #   branches:
+        #     only: main
